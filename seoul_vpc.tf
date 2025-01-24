@@ -1,6 +1,8 @@
 resource "aws_vpc" "seoul" {
   provider = aws.seoul
   cidr_block = "10.1.0.0/16"
+  enable_dns_hostnames = true
+  
   tags = {
     Name = "seoul-vpc"
   }
@@ -34,11 +36,31 @@ resource "aws_route_table" "seoul" {
     Name = each.key
   }
 }
-module "igw" {
+module "seoul-igw" {
   source = "./modules/internetgateway"
   vpc_id = aws_vpc.seoul.id
   igw_name = "seoul-igw"
   route_table_id = aws_route_table.seoul["public"].id
+}
+resource "aws_route" "seoul-nat" {
+  for_each = {
+    private3 = {
+      route_table_id = aws_route_table.seoul["private3"].id
+      network_interface_id = aws_instance.seoul_pub1.primary_network_interface_id
+    }
+    private4 = {
+      route_table_id = aws_route_table.seoul["private4"].id
+      network_interface_id = aws_instance.seoul_pub2.primary_network_interface_id
+    }
+  }
+  provider = aws.seoul
+  route_table_id            = each.value.route_table_id
+  destination_cidr_block    = "0.0.0.0/0"
+  network_interface_id = each.value.network_interface_id
+  depends_on                = [
+    aws_instance.seoul_pub1,
+    aws_instance.seoul_pub2
+  ]
 }
 resource "aws_route_table_association" "seoul" {
   provider = aws.seoul
@@ -51,52 +73,4 @@ resource "aws_route_table_association" "seoul" {
   }
   subnet_id      = each.value.subnet_id
   route_table_id = each.value.route_table_id
-}
-resource "aws_security_group" "seoul" {
-  provider = aws.seoul
-  name   = "seoul_sg"
-  vpc_id = aws_vpc.seoul.id
-  dynamic "ingress" {
-    for_each = [
-      { from_port = 22, to_port = 22, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-      { from_port = 80, to_port = 80, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-      { from_port = 443, to_port = 443, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-      { from_port = 53, to_port = 53, protocol = "udp", cidr_blocks = ["0.0.0.0/0"] },
-      { from_port = 53, to_port = 53, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-      { from_port = 4500, to_port = 4500, protocol = "udp", cidr_blocks = ["0.0.0.0/0"] },
-      { from_port = 3306, to_port = 3306, protocol = "tcp", cidr_blocks = ["0.0.0.0/0"] },
-      { from_port = -1, to_port = -1, protocol = "icmp", cidr_blocks = ["0.0.0.0/0"] }
-    ]
-    content {
-      from_port   = ingress.value.from_port
-      to_port     = ingress.value.to_port
-      protocol    = ingress.value.protocol
-      cidr_blocks = ingress.value.cidr_blocks
-    }
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-resource "aws_route" "nat" {
-  for_each = {
-    private3 = {
-      route_table_id = aws_route_table.seoul["private3"].id
-      destination_cidr_block = "0.0.0.0/0"
-      network_interface_id = aws_instance.seoul_pub1.primary_network_interface_id
-    }
-    private4 = {
-      route_table_id = aws_route_table.seoul["private4"].id
-      destination_cidr_block = "0.0.0.0/0"
-      network_interface_id = aws_instance.seoul_pub2.primary_network_interface_id
-    }
-  }
-  provider = aws.seoul
-  route_table_id            = each.value.route_table_id
-  destination_cidr_block    = each.value.destination_cidr_block
-  network_interface_id = each.value.network_interface_id
-  depends_on                = [aws_instance.seoul_pub2]
 }

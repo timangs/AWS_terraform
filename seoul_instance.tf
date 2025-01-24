@@ -1,6 +1,7 @@
 resource "aws_instance" "seoul_pub1" {
   provider = aws.seoul
   ami           = var.seoul-nat-ami
+  source_dest_check = false
   instance_type = "t2.micro"
   associate_public_ip_address = "true"
   private_ip = "10.1.1.100"
@@ -13,13 +14,14 @@ resource "aws_instance" "seoul_pub1" {
   user_data = <<EOF
 #!/bin/bash
 yum -y install tcpdump iptraf
-hostname Seoul-AWS-NATInstance1
+hostname Se-NAT-10-1-1-100
 EOF
 }
 
 resource "aws_instance" "seoul_pub2" {
   provider = aws.seoul
   ami           = var.seoul-nat-ami
+  source_dest_check = false
   instance_type = "t2.micro"
   associate_public_ip_address = "true"
   private_ip = "10.1.2.100"
@@ -32,7 +34,7 @@ resource "aws_instance" "seoul_pub2" {
   user_data = <<EOF
 #!/bin/bash
 yum -y install tcpdump iptraf
-hostname Seoul-AWS-NATInstance2
+hostname Se-NAT-10-1-2-100
 EOF
 }
 
@@ -59,6 +61,7 @@ yum install -y httpd
 systemctl start httpd
 systemctl enable httpd
 echo "<h1>Seoul AWS Private Instance 1</h1>" > /var/www/html/index.html
+hostname Se-Private-10-1-3-100
 EOF
 }
 
@@ -85,5 +88,6 @@ yum install -y httpd
 systemctl start httpd
 systemctl enable httpd
 echo "<h1>Seoul AWS Private Instance 2</h1>" > /var/www/html/index.html
+hostname Se-Private-10-1-4-100
 EOF
 }
