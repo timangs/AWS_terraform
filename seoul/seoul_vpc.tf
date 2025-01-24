@@ -36,7 +36,7 @@ resource "aws_route_table" "seoul" {
   }
 }
 module "seoul-igw" {
-  source = "./modules/internetgateway"
+  source = "../modules/internetgateway"
   vpc_id = aws_vpc.seoul.id
   igw_name = "seoul-igw"
   route_table_id = aws_route_table.seoul["public"].id
