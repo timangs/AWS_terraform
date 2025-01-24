@@ -2,7 +2,6 @@ resource "aws_vpc" "seoul" {
   provider = aws.seoul
   cidr_block = "10.1.0.0/16"
   enable_dns_hostnames = true
-  
   tags = {
     Name = "seoul-vpc"
   }
@@ -24,13 +23,13 @@ resource "aws_subnet" "seoul" {
   }
 }
 resource "aws_route_table" "seoul" {
+  provider = aws.seoul
   for_each = {
     public      = {}
     private3    = {}
     private4    = {}
     tgw         = {}
   }
-  provider = aws.seoul
   vpc_id = aws_vpc.seoul.id
   tags = {
     Name = each.key
@@ -43,6 +42,7 @@ module "seoul-igw" {
   route_table_id = aws_route_table.seoul["public"].id
 }
 resource "aws_route" "seoul-nat" {
+  provider = aws.seoul
   for_each = {
     private3 = {
       route_table_id = aws_route_table.seoul["private3"].id
@@ -53,7 +53,6 @@ resource "aws_route" "seoul-nat" {
       network_interface_id = aws_instance.seoul_pub2.primary_network_interface_id
     }
   }
-  provider = aws.seoul
   route_table_id            = each.value.route_table_id
   destination_cidr_block    = "0.0.0.0/0"
   network_interface_id = each.value.network_interface_id
