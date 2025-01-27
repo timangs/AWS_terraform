@@ -1,6 +1,6 @@
 resource "aws_vpc" "singa" {
   provider = aws.singa
-  cidr_block = "10.2.0.0/16"
+  cidr_block = "10.3.0.0/16"
   enable_dns_hostnames = true
   tags = {
     Name = "singa-vpc"
@@ -9,9 +9,9 @@ resource "aws_vpc" "singa" {
 resource "aws_subnet" "singa" {
   provider = aws.singa
   for_each = {
-    sn1 = {cidr_block="10.2.1.0/24",availability_zone="ap-southeast-1a"}
-    sn3 = {cidr_block="10.2.3.0/24",availability_zone="ap-southeast-1a"}
-    sn5 = {cidr_block="10.2.5.0/24",availability_zone="ap-southeast-1c"}
+    sn1 = {cidr_block="10.3.1.0/24",availability_zone="ap-southeast-1a"}
+    sn3 = {cidr_block="10.3.3.0/24",availability_zone="ap-southeast-1a"}
+    sn5 = {cidr_block="10.3.5.0/24",availability_zone="ap-southeast-1c"}
   }
   vpc_id     = aws_vpc.singa.id
   cidr_block = each.value.cidr_block
@@ -25,7 +25,7 @@ resource "aws_route_table" "singa" {
   for_each = {
     public      = {}
     private3    = {}
-    tgw         = {}
+    vpn         = {}
   }
   vpc_id = aws_vpc.singa.id
   tags = {
@@ -65,7 +65,7 @@ resource "aws_route_table_association" "singa" {
   for_each = {
     sn1 = {subnet_id=aws_subnet.singa["sn1"].id,route_table_id=aws_route_table.singa["public"].id}
     sn3 = {subnet_id=aws_subnet.singa["sn3"].id,route_table_id=aws_route_table.singa["private3"].id}
-    sn5 = {subnet_id=aws_subnet.singa["sn5"].id,route_table_id=aws_route_table.singa["tgw"].id}
+    sn5 = {subnet_id=aws_subnet.singa["sn5"].id,route_table_id=aws_route_table.singa["vpn"].id}
   }
   subnet_id      = each.value.subnet_id
   route_table_id = each.value.route_table_id

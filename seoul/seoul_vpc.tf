@@ -28,18 +28,25 @@ resource "aws_route_table" "seoul" {
     public      = {}
     private3    = {}
     private4    = {}
-    tgw         = {}
+    vpn         = {}
   }
   vpc_id = aws_vpc.seoul.id
   tags = {
     Name = each.key
   }
 }
-module "seoul-igw" {
-  source = "../modules/internetgateway"
+resource "aws_internet_gateway" "seoul-igw" {
+    provider = aws.seoul
   vpc_id = aws_vpc.seoul.id
-  igw_name = "seoul-igw"
-  route_table_id = aws_route_table.seoul["public"].id
+  tags = {
+    Name = "seoul-igw"
+  }
+}
+resource "aws_route" "seoul-igw" {
+    provider = aws.seoul
+    route_table_id            = aws_route_table.seoul["public"].id
+    destination_cidr_block    = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.seoul-igw.id
 }
 resource "aws_route" "seoul-nat" {
   provider = aws.seoul
@@ -68,7 +75,7 @@ resource "aws_route_table_association" "seoul" {
     sn2 = {subnet_id=aws_subnet.seoul["sn2"].id,route_table_id=aws_route_table.seoul["public"].id}
     sn3 = {subnet_id=aws_subnet.seoul["sn3"].id,route_table_id=aws_route_table.seoul["private3"].id}
     sn4 = {subnet_id=aws_subnet.seoul["sn4"].id,route_table_id=aws_route_table.seoul["private4"].id}
-    sn5 = {subnet_id=aws_subnet.seoul["sn5"].id,route_table_id=aws_route_table.seoul["tgw"].id}
+    sn5 = {subnet_id=aws_subnet.seoul["sn5"].id,route_table_id=aws_route_table.seoul["vpn"].id}
   }
   subnet_id      = each.value.subnet_id
   route_table_id = each.value.route_table_id

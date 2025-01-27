@@ -3,7 +3,7 @@ provider "aws" {
   region = "ap-northeast-2"
 }
 provider "aws" {
-  alias = "singapore"
+  alias = "singa"
   region = "ap-southeast-1"
 }
 # key pair

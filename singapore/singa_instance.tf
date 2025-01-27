@@ -4,7 +4,7 @@ resource "aws_instance" "singa_pub1" {
   source_dest_check = false
   instance_type = "t2.micro"
   associate_public_ip_address = "true"
-  private_ip = "10.2.1.100"
+  private_ip = "10.3.1.100"
   key_name = var.singakey
   subnet_id = aws_subnet.singa["sn1"].id
   security_groups = [aws_security_group.singa.id]
@@ -14,7 +14,7 @@ resource "aws_instance" "singa_pub1" {
   user_data = <<EOF
 #!/bin/bash
 yum -y install tcpdump iptraf
-hostname Si-NAT-10-2-1-100
+hostname Si-NAT-10-3-1-100
 EOF
 }
 
@@ -24,7 +24,7 @@ resource "aws_instance" "singa_pri1" {
   ami           = var.singa-ami
   instance_type = "t2.micro"
   # associate_public_ip_address = "true"
-  private_ip = "10.2.3.100"
+  private_ip = "10.3.3.100"
   subnet_id = aws_subnet.singa["sn3"].id
   security_groups = [aws_security_group.singa.id]
   tags = {
@@ -42,6 +42,6 @@ yum install -y httpd
 systemctl start httpd
 systemctl enable httpd
 echo "<h1>singa AWS Private Instance 1</h1>" > /var/www/html/index.html
-hostname Si-Private-10-2-3-100
+hostname Si-Private-10-3-3-100
 EOF
 }

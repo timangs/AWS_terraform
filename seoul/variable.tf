@@ -4,7 +4,7 @@ provider "aws" {
 }
 
 provider "aws" {
-  alias = "singapore"
+  alias = "singa"
   region = "ap-southeast-1"
 }
 
