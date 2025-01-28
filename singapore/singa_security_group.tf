@@ -10,6 +10,7 @@ resource "aws_security_group" "singa" {
       { from_port = 53, to_port = 53, protocol = "udp" },
       { from_port = 53, to_port = 53, protocol = "tcp" },
       { from_port = 4500, to_port = 4500, protocol = "udp" },
+      { from_port = 500, to_port = 500, protocol = "udp" },
       { from_port = 3306, to_port = 3306, protocol = "tcp" },
       { from_port = -1, to_port = -1, protocol = "icmp" }
     ]

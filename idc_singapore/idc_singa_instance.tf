@@ -159,74 +159,76 @@
     │ Configuration for aws_instance.idc-singa_cgw may not refer to itself.
         문제점 : Instance가 생성되기 이전에 Public Ip를 참조하여 UserData에 사용하려고 함.
         해결방안 : ENI, EIP를 생성하여 UserData에 사용하도록 함. */
-resource "aws_network_interface" "idc-singa_cgw_eni" {
-  provider          = aws.singa
-  subnet_id         = aws_subnet.idc-singa.id
-  private_ips       = ["10.4.1.50"]
-  security_groups   = [aws_security_group.idc-singa.id]
-  source_dest_check = false
-  tags = {
-    Name = "idc-singa_cgw_eni"
-  }
-}
-resource "aws_eip" "idc-singa_cgw_eip" { 
-    provider = aws.singa
-    network_interface = aws_network_interface.idc-singa_cgw_eni.id
-} 
-resource "aws_instance" "idc-singa_cgw" {
-  provider = aws.singa
-  ami           = var.singa-ami
-  instance_type = "t2.micro"
-  key_name = var.singakey
-  network_interface {
-    network_interface_id = aws_network_interface.idc-singa_cgw_eni.id
-    device_index = 0
-  }
-  tags = {
-    Name = "idc-singa_cgw"
-  }
-  user_data = <<EOE
-#!/bin/bash
-yum -y install tcpdump openswan
-cat <<EOF>> /etc/sysctl.conf
-net.ipv4.ip_forward=1
-net.ipv4.conf.all.accept_redirects = 0
-net.ipv4.conf.all.send_redirects = 0
-net.ipv4.conf.default.send_redirects = 0
-net.ipv4.conf.eth0.send_redirects = 0
-net.ipv4.conf.default.accept_redirects = 0
-net.ipv4.conf.eth0.accept_redirects = 0
-net.ipv4.conf.ip_vti0.rp_filter = 0
-net.ipv4.conf.eth0.rp_filter = 0
-net.ipv4.conf.default.rp_filter = 0
-net.ipv4.conf.all.rp_filter = 0
-EOF
-sysctl -p /etc/sysctl.conf
-cat <<EOF> /etc/ipsec.d/aws.conf
-conn Tunnel1
-  authby=secret
-  auto=start
-  left=%defaultroute
-  leftid=${aws_eip.idc-singa_cgw_eip.public_ip}
-  right=11.22.33.44
-  type=tunnel
-  ikelifetime=8h
-  keylife=1h
-  phase2alg=aes128-sha1;modp1024
-  ike=aes128-sha1;modp1024
-  keyingtries=%forever
-  keyexchange=ike
-  leftsubnet=10.4.0.0/16
-  rightsubnet=10.3.0.0/16
-  dpddelay=10
-  dpdtimeout=30
-  dpdaction=restart_by_peer
-EOF
-cat <<EOF> /etc/ipsec.d/aws.secrets
-${aws_eip.idc-singa_cgw_eip.public_ip} 11.22.33.44 : PSK "timangs"
-EOF
-systemctl start ipsec
-systemctl enable ipsec
-hostnamectl --static set-hostname IDC-CGW
-EOE
-}
+        
+####### singa_vpn.tf로 이동
+# resource "aws_network_interface" "idc-singa_cgw_eni" {
+#   provider          = aws.singa
+#   subnet_id         = aws_subnet.idc-singa.id
+#   private_ips       = ["10.4.1.50"]
+#   security_groups   = [aws_security_group.idc-singa.id]
+#   source_dest_check = false
+#   tags = {
+#     Name = "idc-singa_cgw_eni"
+#   }
+# }
+# resource "aws_eip" "idc-singa_cgw_eip" { 
+#     provider = aws.singa
+#     network_interface = aws_network_interface.idc-singa_cgw_eni.id
+# } 
+# resource "aws_instance" "idc-singa_cgw" {
+#   provider = aws.singa
+#   ami           = var.singa-ami
+#   instance_type = "t2.micro"
+#   key_name = var.singakey
+#   network_interface {
+#     network_interface_id = aws_network_interface.idc-singa_cgw_eni.id
+#     device_index = 0
+#   }
+#   tags = {
+#     Name = "idc-singa_cgw"
+#   }
+#   user_data = <<EOE
+# #!/bin/bash
+# yum -y install tcpdump openswan
+# cat <<EOF>> /etc/sysctl.conf
+# net.ipv4.ip_forward=1
+# net.ipv4.conf.all.accept_redirects = 0
+# net.ipv4.conf.all.send_redirects = 0
+# net.ipv4.conf.default.send_redirects = 0
+# net.ipv4.conf.eth0.send_redirects = 0
+# net.ipv4.conf.default.accept_redirects = 0
+# net.ipv4.conf.eth0.accept_redirects = 0
+# net.ipv4.conf.ip_vti0.rp_filter = 0
+# net.ipv4.conf.eth0.rp_filter = 0
+# net.ipv4.conf.default.rp_filter = 0
+# net.ipv4.conf.all.rp_filter = 0
+# EOF
+# sysctl -p /etc/sysctl.conf
+# cat <<EOF> /etc/ipsec.d/aws.conf
+# conn Tunnel1
+#   authby=secret
+#   auto=start
+#   left=%defaultroute
+#   leftid=${aws_eip.idc-singa_cgw_eip.public_ip}
+#   right=${aws_vpn_connection.idc-singa.tunnel1_address}
+#   type=tunnel
+#   ikelifetime=8h
+#   keylife=1h
+#   phase2alg=aes128-sha1;modp1024
+#   ike=aes128-sha1;modp1024
+#   keyingtries=%forever
+#   keyexchange=ike
+#   leftsubnet=10.4.0.0/16
+#   rightsubnet=10.3.0.0/16
+#   dpddelay=10
+#   dpdtimeout=30
+#   dpdaction=restart_by_peer
+# EOF
+# cat <<EOF> /etc/ipsec.d/aws.secrets
+# ${aws_eip.idc-singa_cgw_eip.public_ip} ${aws_vpn_connection.idc-singa.tunnel1_address} : PSK "timangs"
+# EOF
+# systemctl start ipsec
+# systemctl enable ipsec
+# hostnamectl --static set-hostname IDC-CGW
+# EOE
+# }

@@ -17,19 +17,18 @@
 #   }
 # }
 
-# resource "aws_ec2_transit_gateway" "singa" {
-#   provider = aws.singa
-#   tags = {
-#     Name = "singa-tgw"
-#   }
-# }
-# resource "aws_ec2_transit_gateway_vpc_attachment" "singa" {
-#   provider = aws.singa
-#   subnet_ids = [module.singa.subnet1_id]
-#   transit_gateway_id = aws_ec2_transit_gateway.singa.id
-#   vpc_id = module.singa.vpc_id
-#   tags = {
-#     Name = "singa-tgw-attachment"
-#   }
-# }
-
+resource "aws_ec2_transit_gateway" "singa" {
+  provider = aws.singa
+  tags = {
+    Name = "singa-tgw"
+  }
+}
+resource "aws_ec2_transit_gateway_vpc_attachment" "singa" {
+  provider = aws.singa
+  subnet_ids = [module.singa.subnet1_id]
+  transit_gateway_id = aws_ec2_transit_gateway.singa.id
+  vpc_id = module.singa.vpc_id
+  tags = {
+    Name = "singa-tgw-attachment"
+  }
+}
