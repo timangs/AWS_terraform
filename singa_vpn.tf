@@ -21,22 +21,17 @@ resource "aws_vpn_connection" "idc-singa" {
   customer_gateway_id = aws_customer_gateway.idc-singa.id
   transit_gateway_id  = aws_ec2_transit_gateway.singa.id
   type                = aws_customer_gateway.idc-singa.type #"ipsec.1"
-  static_routes_only = true
+  # static_routes_only = true
   tunnel1_preshared_key = "psk_timangs" # expected length of tunnel1_preshared_key to be in the range (8 - 64), got timangs
   tags = {
     Name = "singa-vpn"
   }
 }
-# resource "aws_vpn_connection_route" "singa" {
-#   provider = aws.singa
-#   vpn_connection_id     = aws_vpn_connection.idc-singa.id
-#   destination_cidr_block = "10.3.0.0/16"
-# }
 resource "aws_ec2_transit_gateway_route" "singa" {
   provider = aws.singa
   transit_gateway_route_table_id = aws_ec2_transit_gateway.singa.association_default_route_table_id
   destination_cidr_block = "10.4.0.0/16"
-  transit_gateway_attachment_id = aws_ec2_transit_gateway_vpc_attachment.singa.id
+  transit_gateway_attachment_id = aws_vpn_connection.idc-singa.transit_gateway_attachment_id
 }
 
 resource "aws_vpn_gateway_route_propagation" "vpc2_route_propagation" {
@@ -45,13 +40,6 @@ resource "aws_vpn_gateway_route_propagation" "vpc2_route_propagation" {
   route_table_id = module.idc-singa.route_table_id
 }
 
-
-# resource "aws_route" "singa_tgw_route" {
-#   provider = aws.singa
-#   route_table_id         = module.idc-singa.route_table_id
-#   destination_cidr_block = "10.3.0.0/16"
-#   transit_gateway_id     = aws_ec2_transit_gateway.singa.id
-# }
 
 resource "aws_route" "singa_vpn_route" {
   provider = aws.singa
@@ -104,6 +92,7 @@ net.ipv4.conf.default.rp_filter = 0
 net.ipv4.conf.all.rp_filter = 0
 EOF
 sysctl -p /etc/sysctl.conf
+sudo ip route add 10.3.0.0/16 via 10.4.1.1 dev eth0
 cat <<EOF> /etc/ipsec.d/aws.conf
 conn Tunnel1
   authby=secret

@@ -8,7 +8,6 @@ output "vpc_id" {
 # route for transit gateway
 output "rt_id" {
   value = aws_route_table.singa["public"].id
-  
 }
 output "vpn_rt_id" {
   value = aws_route_table.singa["vpn"].id
