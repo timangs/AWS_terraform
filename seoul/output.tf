@@ -7,10 +7,11 @@ output "subnet2_id" {
 }
 output "vpc_id" {
   value = aws_vpc.seoul.id
+  depends_on = [ aws_vpc.seoul ]
 }
 
 # route for transit gateway
 output "rt_id" {
   value = aws_route_table.seoul["public"].id
-  
+  depends_on = [ aws_route_table.seoul["public"] ]
 }

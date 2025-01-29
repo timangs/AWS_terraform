@@ -11,7 +11,8 @@ resource "aws_subnet" "singa" {
   for_each = {
     sn1 = {cidr_block="10.3.1.0/24",availability_zone="ap-southeast-1a"}
     sn3 = {cidr_block="10.3.3.0/24",availability_zone="ap-southeast-1a"}
-    sn5 = {cidr_block="10.3.5.0/24",availability_zone="ap-southeast-1c"}
+    sn5 = {cidr_block="10.3.5.0/24",availability_zone="ap-southeast-1a"}
+    sn6 = {cidr_block="10.3.6.0/24",availability_zone="ap-southeast-1a"}
   }
   vpc_id     = aws_vpc.singa.id
   cidr_block = each.value.cidr_block
@@ -52,6 +53,10 @@ resource "aws_route" "singa-nat" {
       route_table_id = aws_route_table.singa["private3"].id
       network_interface_id = aws_instance.singa_pub1.primary_network_interface_id
     }
+    vpn = {
+      route_table_id = aws_route_table.singa["vpn"].id
+      network_interface_id = aws_instance.singa_pub1.primary_network_interface_id
+    }
   }
   route_table_id            = each.value.route_table_id
   destination_cidr_block    = "0.0.0.0/0"
@@ -66,6 +71,7 @@ resource "aws_route_table_association" "singa" {
     sn1 = {subnet_id=aws_subnet.singa["sn1"].id,route_table_id=aws_route_table.singa["public"].id}
     sn3 = {subnet_id=aws_subnet.singa["sn3"].id,route_table_id=aws_route_table.singa["private3"].id}
     sn5 = {subnet_id=aws_subnet.singa["sn5"].id,route_table_id=aws_route_table.singa["vpn"].id}
+    sn6 = {subnet_id=aws_subnet.singa["sn6"].id,route_table_id=aws_route_table.singa["vpn"].id}
   }
   subnet_id      = each.value.subnet_id
   route_table_id = each.value.route_table_id
