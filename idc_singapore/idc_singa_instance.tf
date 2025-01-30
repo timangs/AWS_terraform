@@ -1,90 +1,96 @@
-# resource "aws_instance" "idc-singa_dns" {
-#   provider = aws.singa
-#   ami           = var.singa-ami
-#   instance_type = "t2.micro"
-#   associate_public_ip_address = "true"
-#   private_ip = "10.4.1.200"
-#   subnet_id = aws_subnet.idc-singa.id
-#   security_groups = [aws_security_group.idc-singa.id]
-#   tags = {
-#     Name = "idc-singa_dns"
-#   }
-#   user_data = <<EOE
-# #!/bin/bash
-# #!/bin/bash
-# hostnamectl --static set-hostname idc-singa-dns
-# sed -i "s/^127.0.0.1 localhost/127.0.0.1 localhost idc-singa-dns/g" /etc/hosts
-# apt-get update -y
-# apt-get install bind9 bind9-doc language-pack-ko -y
-# cat <<EOT> /etc/bind/named.conf.options
-# options {
-#   directory "/var/cache/bind";
-#   recursion yes;
-#   allow-query { any; };
-#   forwarders {
-#         8.8.8.8;
-#         };
-#   forward only;
-#   auth-nxdomain no;
-# };
-# zone "awssinga.internal" {
-#     type forward;
-#     forward only;
-#     forwarders { 10.1.3.250; 10.1.4.250; };
-# };
-# zone "awssinga.internal" {
-#     type forward;
-#     forward only;
-#     forwarders { 10.3.3.250; 10.3.4.250; };
-# };
-# EOT
-# cat <<EOT> /etc/bind/named.conf.local
-# zone "idcsinga.internal" {
-#     type master;
-#     file "/etc/bind/db.idcsinga.internal";
-# };
-# zone "2.10.in-addr.arpa" {
-#     type master;
-#     file "/etc/bind/db.10.2";
-# };
-# EOT
-# cat <<EOT> /etc/bind/db.idcsinga.internal
-# \$TTL 30
-# @ IN SOA idcsinga.internal. root.idcsinga.internal. (
-#   2019122114 ; serial
-#   3600       ; refresh
-#   900        ; retry
-#   604800     ; expire
-#   86400      ; minimum ttl
-# )
-# ; dns server
-# @      IN NS ns1.idcsinga.internal.
-# ; ip address of dns server
-# ns1    IN A  10.2.1.200
-# ; Hosts
-# db   IN A  10.2.1.100
-# dns   IN A  10.2.1.200
-# EOT
-# cat <<EOT> /etc/bind/db.10.2
-# \$TTL 30
-# @ IN SOA idcsinga.internal. root.idcsinga.internal. (
-#   2019122114 ; serial
-#   3600       ; refresh
-#   900        ; retry
-#   604800     ; expire
-#   86400      ; minimum ttl
-# )
-# ; dns server
-# @      IN NS ns1.idcsinga.internal.
-# ; ip address of dns server
-# 3      IN PTR  ns1.idcsinga.internal.
-# ; A Record list
-# 100.1    IN PTR  db.idcsinga.internal.
-# 200.1    IN PTR  dns.idcsinga.internal.
-# EOT
-# systemctl start bind9 && systemctl enable bind9
-# EOE
-# }
+resource "aws_instance" "idc-singa_dns" {
+  provider = aws.singa
+  ami           = var.singa-ami
+  instance_type = "t2.micro"
+  associate_public_ip_address = "true"
+  private_ip = "10.4.1.200"
+  subnet_id = aws_subnet.idc-singa.id
+  key_name = var.singakey
+  security_groups = [aws_security_group.idc-singa.id]
+  tags = {
+    Name = "idc-singa_dns"
+  }
+  user_data = <<EOE
+#!/bin/bash
+hostnamectl set-hostname idc-singa-dns
+ip route add 10.0.0.0/8 via 10.4.1.50
+sed -i "s/^127.0.0.1   localhost/127.0.0.1 localhost idc-singa-dns/g" /etc/hosts
+# Update and install necessary packages
+yum update -y
+yum install -y bind bind-utils glibc-langpack-ko
+# Configure BIND
+cat <<EOT > /etc/named.conf
+options {
+  directory "/var/named";
+  recursion yes;
+  allow-query { any; };
+  forwarders {
+        8.8.8.8;
+  };
+  forward only;
+  auth-nxdomain no;
+};
+zone "awsseoul.internal" {
+    type forward;
+    forward only;
+    forwarders { 10.1.3.250; 10.1.4.250; };
+};
+zone "awssinga.internal" {
+    type forward;
+    forward only;
+    forwarders { 10.3.3.250; 10.3.4.250; };
+};
+zone "idcsinga.internal" {
+    type master;
+    file "/var/named/db.idcsinga.internal";
+};
+zone "4.10.in-addr.arpa" {
+    type master;
+    file "/var/named/db.10.4";
+};
+EOT
+# Create forward zone file
+cat <<EOT > /var/named/db.idcsinga.internal
+\$TTL 86400  ; 1 day
+@ IN SOA idcsinga.internal. root.idcsinga.internal. (
+    2025013001 ; serial
+    3600       ; refresh
+    900        ; retry
+    604800     ; expire
+    86400      ; minimum ttl
+)
+; DNS server
+@      IN NS ns1.idcsinga.internal.
+ns1    IN A  10.4.1.200
+; Hosts
+db     IN A  10.4.1.100
+dns    IN A  10.4.1.200
+cgw    IN A  10.4.1.50
+EOT
+# Create reverse zone file
+cat <<EOT > /var/named/db.10.4
+\$TTL 86400  ; 1 day
+@ IN SOA idcsinga.internal. root.idcsinga.internal. (
+    2025013002 ; serial
+    3600       ; refresh
+    900        ; retry
+    604800     ; expire
+    86400      ; minimum ttl
+)
+; DNS server
+@      IN NS ns1.idcsinga.internal.
+; PTR Records
+100.1    IN PTR db.idcsinga.internal.  ; TTL 86400
+200.1    IN PTR dns.idcsinga.internal. ; TTL 86400
+50.1     IN PTR cgw.idcsinga.internal.  ; TTL 86400
+EOT
+# Set permissions and restart BIND
+chown named:named /var/named/db.idcsinga.internal /var/named/db.10.4
+chmod 640 /var/named/db.idcsinga.internal /var/named/db.10.4
+systemctl enable named
+systemctl start named
+EOE
+}
 ######################################################################
 # resource "aws_instance" "idc-singa_db" {
 #   provider = aws.singa

@@ -11,6 +11,7 @@ resource "aws_subnet" "singa" {
   for_each = {
     sn1 = {cidr_block="10.3.1.0/24",availability_zone="ap-southeast-1a"}
     sn3 = {cidr_block="10.3.3.0/24",availability_zone="ap-southeast-1a"}
+    sn4 = {cidr_block="10.3.4.0/24",availability_zone="ap-southeast-1a"}
     sn5 = {cidr_block="10.3.5.0/24",availability_zone="ap-southeast-1a"}
     sn6 = {cidr_block="10.3.6.0/24",availability_zone="ap-southeast-1a"}
   }
@@ -70,6 +71,7 @@ resource "aws_route_table_association" "singa" {
   for_each = {
     sn1 = {subnet_id=aws_subnet.singa["sn1"].id,route_table_id=aws_route_table.singa["public"].id}
     sn3 = {subnet_id=aws_subnet.singa["sn3"].id,route_table_id=aws_route_table.singa["private3"].id}
+    sn4 = {subnet_id=aws_subnet.singa["sn4"].id,route_table_id=aws_route_table.singa["private3"].id}
     sn5 = {subnet_id=aws_subnet.singa["sn5"].id,route_table_id=aws_route_table.singa["vpn"].id}
     sn6 = {subnet_id=aws_subnet.singa["sn6"].id,route_table_id=aws_route_table.singa["vpn"].id}
   }
