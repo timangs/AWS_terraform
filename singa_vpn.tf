@@ -103,7 +103,7 @@ conn Tunnel1
   keyingtries=%forever
   keyexchange=ike
   leftsubnet=10.4.0.0/16
-  rightsubnet=10.0.0.0/8
+  rightsubnet=10.3.0.0/16
   dpddelay=10
   dpdtimeout=30
   dpdaction=restart_by_peer
@@ -122,7 +122,7 @@ conn Tunnel2
   keyingtries=%forever
   keyexchange=ike
   leftsubnet=10.4.0.0/16
-  rightsubnet=10.0.0.0/8
+  rightsubnet=10.3.0.0/16
   dpddelay=10
   dpdtimeout=30
   dpdaction=restart_by_peer
@@ -133,8 +133,6 @@ ${aws_eip.idc-singa_cgw_eip.public_ip} ${aws_vpn_connection.idc-singa.tunnel1_ad
 EOF
 systemctl start ipsec
 systemctl enable ipsec
-echo "nameserver 10.4.1.200" > /etc/resolv.conf
-echo "search idcsinga.internal" >> /etc/resolv.conf
 hostnamectl --static set-hostname IDC-CGW
 EOE
 }

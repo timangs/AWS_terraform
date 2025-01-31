@@ -1,3 +1,16 @@
+
+resource "aws_vpc_dhcp_options" "idc_singa" {
+  domain_name_servers = ["10.4.1.200", "10.4.0.2"]
+  domain_name = "idcsinga.internal"
+    tags = {
+        Name = "idc-singa-dns-resolver"
+    }
+}
+resource "aws_vpc_dhcp_options_association" "idc_singa" {
+  vpc_id          = aws_vpc.idc-singa.id
+  dhcp_options_id = aws_vpc_dhcp_options.idc_singa.id
+}
+
 resource "aws_instance" "idc-singa_dns" {
   provider = aws.singa
   ami           = var.singa-ami
@@ -5,6 +18,7 @@ resource "aws_instance" "idc-singa_dns" {
   associate_public_ip_address = "true"
   private_ip = "10.4.1.200"
   subnet_id = aws_subnet.idc-singa.id
+  source_dest_check = false
   key_name = var.singakey
   security_groups = [aws_security_group.idc-singa.id]
   tags = {
@@ -13,22 +27,46 @@ resource "aws_instance" "idc-singa_dns" {
   user_data = <<EOE
 #!/bin/bash
 hostnamectl set-hostname idc-singa-dns
+echo "toor" | passwd --stdin root
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+sed -i 's/^PermitRootLogin/#PermitRootLogin/g' /etc/ssh/sshd_config
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+systemctl restart sshd
 ip route add 10.0.0.0/8 via 10.4.1.50
 sed -i "s/^127.0.0.1   localhost/127.0.0.1 localhost idc-singa-dns/g" /etc/hosts
 # Update and install necessary packages
 yum update -y
 yum install -y bind bind-utils glibc-langpack-ko
 # Configure BIND
+cp -p /etc/named.conf /etc/named.conf.bak
 cat <<EOT > /etc/named.conf
 options {
-  directory "/var/named";
-  recursion yes;
-  allow-query { any; };
-  forwarders {
-        8.8.8.8;
-  };
-  forward only;
-  auth-nxdomain no;
+        listen-on port 53 { any; };
+        listen-on-v6 port 53 { ::1; };
+        directory       "/var/named";
+        dump-file       "/var/named/data/cache_dump.db";
+        statistics-file "/var/named/data/named_stats.txt";
+        memstatistics-file "/var/named/data/named_mem_stats.txt";        
+        recursing-file  "/var/named/data/named.recursing";
+        secroots-file   "/var/named/data/named.secroots";
+        allow-query     { any; };
+        recursion yes;
+        dnssec-enable no;
+        dnssec-validation no;
+        bindkeys-file "/etc/named.root.key";
+        managed-keys-directory "/var/named/dynamic";
+        pid-file "/run/named/named.pid";
+        session-keyfile "/run/named/session.key";
+};
+logging {
+        channel default_debug {
+                file "data/named.run";
+                severity dynamic;
+        };
+};
+zone "." IN {
+        type hint;
+        file "named.ca";
 };
 zone "awsseoul.internal" {
     type forward;
@@ -48,6 +86,8 @@ zone "4.10.in-addr.arpa" {
     type master;
     file "/var/named/db.10.4";
 };
+include "/etc/named.rfc1912.zones";
+include "/etc/named.root.key";
 EOT
 # Create forward zone file
 cat <<EOT > /var/named/db.idcsinga.internal
