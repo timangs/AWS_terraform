@@ -1,0 +1,76 @@
+SQL
+
+1. DDL(데이타베이스 정의어) CREATE, ALTER, DROP
+
+생성
+CREATE DATABASE DB명 ;
+USE DB명 ;
+CREATE TABLE 테이블명 (속성1 데이터타입 옵션, 속성2 데이터타입 옵션,.....) ;
+DESCRIBE 테이블명 ;
+CREATE USER '사용자명'@'접속위치' IDENTIFIED BY '비밀번호';
+
+수정
+ALTER TABLE 테이블이름 ADD 속성명 데이터타입 옵션 ;
+ALTER TABLE 테이블이름 DROP COLUMN 속성명 ;
+ALTER TABLE 테이블이름 CHANGE 원래속성명 바꿀속성명 데이터타입 옵션 ;
+
+삭제
+DROP { 데이터베이스명 | 테이블명 } ;
+
+2. DML(데이타베이스 조작어) SELECT, INSERT, UPDATE, DELETE
+
+조회
+SELECT 속성1, 속성2,...FROM 테이블명 [WHERE 조건];
+
+삽입
+INSERT INTO 테이블명 (속성1, 속성2,....) VALUES ( 값1, 값2,...);
+
+수정
+UPDATE 테이블명 SET 속성1=값1 [WHERE 조건];
+
+행삭제
+DELETE FROM 테이블명 WHERE 조건 ;
+
+3. DCL(데이타베이스 제어어) GRANTE, REVOKE
+
+권한부여
+GRANTE 권한(SELECT,INSERT,CREATE,.....) ON DB명.테이블명 TO '사용자명'@'접속위치' ;
+
+GRANTE ALL privileges on *.* to 'user1'@'%' ;
+
+권한회수
+REVOKE 권한(SELECT,INSERT,CREATE,.....) ON DB명.테이블명 TO '사용자명'@'접속위치' ;
+
+REVOKE ALL privileges on *.* to 'user1'@'%' ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+header("Content-Type:text/html;charset=utf-8");
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+
+
+master 서버 DB에서 설정
+
+DB 사용자 추가 (사용자명 soldesk, PW: p@ssw0rd) 192.168.111.200 에서만 로그인 허용
+soldesk사용자는 192.168.111.200에서만 로그인 했을때 모든 권한 부여
+
+
+slave 서버
+
+로그인 사용자를 soldesk로 변경 후 테스트.
+
+
+DATABASE Replication (복제)
