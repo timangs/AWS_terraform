@@ -17,20 +17,47 @@ hostnamectl --static set-hostname singa-db
 yum install -y mariadb-server mariadb lynx
 systemctl start mariadb && systemctl enable mariadb
 echo -e "\n\nqwe123\nqwe123\ny\ny\ny\ny\n" | /usr/bin/mysql_secure_installation
-mysql -uroot -pqwe123 -e "CREATE DATABASE sample; GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' IDENTIFIED BY 'qwe123'; GRANT REPLICATION SLAVE ON *.* TO 'repl_user'@'%' IDENTIFIED BY 'qwe123'; flush privileges;"
-mysql -uroot -pqwe123 -e "USE sample;CREATE TABLE EMPLOYEES (ID int(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,NAME VARCHAR(45),ADDRESS VARCHAR(90));"
-cat <<EOT> /etc/my.cnf
+# mysql -uroot -pqwe123 -e "CREATE DATABASE sample; GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' IDENTIFIED BY 'qwe123'; GRANT REPLICATION SLAVE ON *.* TO 'repl_user'@'%' IDENTIFIED BY 'qwe123'; flush privileges;"
+# mysql -uroot -pqwe123 -e "USE sample;CREATE TABLE EMPLOYEES (ID int(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,NAME VARCHAR(45),ADDRESS VARCHAR(90));"
+echo '[client]' > ~/.my.cnf
+echo 'user=root' >> ~/.my.cnf
+echo 'password=qwe123' >> ~/.my.cnf
+chmod 600 ~/.my.cnf
+# mysqldump --defaults-extra-file=/root/.my.cnf --all-databases --lock-all-tables --events > /home/ec2-user/mysql_dump.sql
+# curl -o /home/ec2-user/userTbl_Query.sql https://raw.githubusercontent.com/timangs/initial_configuration_terraform/main/web_sample/userTbl_Query.sql
+# mysql -uroot -pqwe123 < /home/ec2-user/userTbl_Query.sql
+sudo amazon-linux-extras install epel -y
+sudo yum install sshpass -y
+# mysqldump --defaults-extra-file=/root/.my.cnf --all-databases --lock-all-tables --events > /home/ec2-user/mysql_dump.sql
+# sshpass -p 'toor' scp -o StrictHostKeyChecking=no mysql_dump.sql root@10.2.1.200:/root/my.sql
+cat <<EOD> /etc/my.cnf.d/server.cnf
 [mysqld]
-datadir=/var/lib/mysql
-socket=/var/lib/mysql/mysql.sock
-symbolic-links=0           
+collation-server = utf8_unicode_ci
+init-connect='SET NAMES utf8'
+character-set-server=utf8
+#validate_password.policy=LOW
+#default_authentication_plugin=mysql_native_password
 log-bin=mysql-bin
-server-id=1
-[mysqld_safe]
-log-error=/var/log/mariadb/mariadb.log
-pid-file=/var/run/mariadb/mariadb.pid
-!includedir /etc/my.cnf.d
-EOT
+server_id=2
+read_only=1
+EOD
+sleep 10
+mysql -u root -p < /root/seoul.sql
+# ls -l /var/lib/mysql/ | awk '{print $9}' | grep -i bin.0 >> /home/ec2-user/binlist
+mysql -uroot -pqwe123 -e "change master to master_host='192.168.111.100',master_user='slave', master_password='toor',master_log_file='mysql-bin.000001',master_log_pos=778;"
+mysql -uroot -pqwe123 -e "START SLAVE;"
+# cat <<EOT> /etc/my.cnf
+# [mysqld]
+# datadir=/var/lib/mysql
+# socket=/var/lib/mysql/mysql.sock
+# symbolic-links=0           
+# log-bin=mysql-bin
+# server-id=1
+# [mysqld_safe]
+# log-error=/var/log/mariadb/mariadb.log
+# pid-file=/var/run/mariadb/mariadb.pid
+# !includedir /etc/my.cnf.d
+# EOT
 systemctl restart mariadb
 cat <<EOT> /home/ec2-user/list.txt
 10.1.3.100
