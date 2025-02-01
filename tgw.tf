@@ -16,7 +16,6 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "seoul" {
     Name = "seoul-tgw-attachment"
   }
 }
-
 resource "aws_ec2_transit_gateway" "singa" {
   provider = aws.singa
   tags = {

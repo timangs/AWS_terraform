@@ -25,7 +25,7 @@ resource "aws_vpn_connection" "idc-singa" {
   tunnel1_preshared_key = "psk_timangs" 
   tunnel2_preshared_key = "psk_timangs"
   local_ipv4_network_cidr = "10.4.0.0/16"
-  remote_ipv4_network_cidr = "10.0.0.0/8"
+  remote_ipv4_network_cidr = "10.3.0.0/16"
   tags = {
     Name = "singa-vpn"
   }
@@ -103,7 +103,7 @@ conn Tunnel1
   keyingtries=%forever
   keyexchange=ike
   leftsubnet=10.4.0.0/16
-  rightsubnet=10.0.0.0/8
+  rightsubnet=10.3.0.0/16
   dpddelay=10
   dpdtimeout=30
   dpdaction=restart_by_peer
@@ -122,7 +122,7 @@ conn Tunnel2
   keyingtries=%forever
   keyexchange=ike
   leftsubnet=10.4.0.0/16
-  rightsubnet=10.0.0.0/8
+  rightsubnet=10.3.0.0/16
   dpddelay=10
   dpdtimeout=30
   dpdaction=restart_by_peer
