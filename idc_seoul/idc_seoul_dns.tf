@@ -1,7 +1,7 @@
 
 resource "aws_vpc_dhcp_options" "idc_seoul" {
   provider = aws.seoul
-  domain_name_servers = ["10.2.1.200", "10.2.0.2"]
+  domain_name_servers = ["10.2.1.200"]
   domain_name = "idcseoul.internal"
     tags = {
         Name = "idc-seoul-dns-resolver"
