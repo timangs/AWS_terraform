@@ -2,7 +2,7 @@ resource "aws_vpc" "idc-singa" {
   provider = aws.singa
   cidr_block = "10.4.0.0/16"
   # enable_dns_hostnames = true
-  enable_dns_support = true
+  enable_dns_support = false
   tags = {
     Name = "idc-singa-vpc"
   }

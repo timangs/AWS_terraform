@@ -1,7 +1,7 @@
 
 resource "aws_vpc_dhcp_options" "idc_singa" {
   provider = aws.singa
-  domain_name_servers = ["10.4.1.200"]
+  domain_name_servers = ["10.4.1.200","8.8.8.8"]
   domain_name = "idcsinga.internal"
     tags = {
         Name = "idc-singa-dns-resolver"
