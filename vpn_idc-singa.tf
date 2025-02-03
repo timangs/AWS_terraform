@@ -47,8 +47,8 @@ resource "aws_route" "singa-vpn-route" {
 
 resource "aws_network_interface" "idc-singa_cgw_eni" {
   provider          = aws.singa
-  subnet_id         = module.idc-singa.subnet_id
-  private_ips       = ["10.4.1.50"]
+  subnet_id         = module.idc-singa.cgw_subnet_id
+  private_ips       = ["10.4.2.100"]
   security_groups   = [module.idc-singa.security_group_id]
   source_dest_check = false
   tags = {

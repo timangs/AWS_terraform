@@ -1,5 +1,6 @@
 
 resource "aws_vpc_dhcp_options" "idc_singa" {
+  provider = aws.singa
   domain_name_servers = ["10.4.1.200"]
   domain_name = "idcsinga.internal"
     tags = {
@@ -7,6 +8,7 @@ resource "aws_vpc_dhcp_options" "idc_singa" {
     }
 }
 resource "aws_vpc_dhcp_options_association" "idc_singa" {
+  provider = aws.singa
   vpc_id          = aws_vpc.idc-singa.id
   dhcp_options_id = aws_vpc_dhcp_options.idc_singa.id
 }
@@ -26,15 +28,11 @@ resource "aws_instance" "idc-singa_dns" {
   }
   user_data = <<EOE
 #!/bin/bash
-hostnamectl set-hostname idc-singa-dns
 echo "toor" | passwd --stdin root
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 sed -i 's/^PermitRootLogin/#PermitRootLogin/g' /etc/ssh/sshd_config
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart sshd
-ip route add 10.3.0.0/16 via 10.2.1.50
-ip route add 10.1.0.0/16 via 10.2.1.50
-ip route add 10.2.0.0/16 via 10.2.1.50
 sed -i "s/^127.0.0.1   localhost/127.0.0.1 localhost idc-singa-dns/g" /etc/hosts
 # Update and install necessary packages
 yum update -y

@@ -30,13 +30,11 @@ resource "aws_instance" "idc-seoul_dns" {
   }
   user_data = <<EOE
 #!/bin/bash
-hostnamectl set-hostname idc-seoul-dns
 echo "toor" | passwd --stdin root
 sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
 sed -i 's/^PermitRootLogin/#PermitRootLogin/g' /etc/ssh/sshd_config
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 systemctl restart sshd
-ip route add 10.0.0.0/8 via 10.2.1.50
 sed -i "s/^127.0.0.1   localhost/127.0.0.1 localhost idc-seoul-dns/g" /etc/hosts
 # Update and install necessary packages
 yum update -y

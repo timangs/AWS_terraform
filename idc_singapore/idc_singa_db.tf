@@ -6,14 +6,12 @@ resource "aws_instance" "idc-singa_db" {
   private_ip = "10.4.1.100"
   subnet_id = aws_subnet.idc-singa.id
   key_name = var.singakey
-  security_groups = [aws_security_group.idc-singa.id]
+  security_groups = [ aws_security_group.idc-singa.id ]
   tags = {
     Name = "idc-singa_db"
   }
   user_data = <<EOE
 #!/bin/bash
-ip route add 10.0.0.0/8 via 10.4.1.50
-hostnamectl --static set-hostname singa-db
 yum install -y mariadb-server mariadb lynx
 systemctl start mariadb && systemctl enable mariadb
 echo -e "\n\nqwe123\nqwe123\ny\ny\ny\ny\n" | /usr/bin/mysql_secure_installation

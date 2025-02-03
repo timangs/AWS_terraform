@@ -47,8 +47,8 @@ resource "aws_route" "seoul-vpn-route" {
 
 resource "aws_network_interface" "idc-seoul_cgw_eni" {
   provider          = aws.seoul
-  subnet_id         = module.idc-seoul.subnet_id
-  private_ips       = ["10.2.1.50"]
+  subnet_id         = module.idc-seoul.cgw_subnet_id
+  private_ips       = ["10.2.2.100"]
   security_groups   = [module.idc-seoul.security_group_id]
   source_dest_check = false
   tags = {

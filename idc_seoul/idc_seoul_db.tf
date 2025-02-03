@@ -12,8 +12,6 @@ resource "aws_instance" "idc-seoul_db" {
   }
   user_data = <<EOE
 #!/bin/bash
-ip route add 10.0.0.0/8 via 10.2.1.50
-hostnamectl --static set-hostname seoul-db
 yum install -y mariadb-server mariadb lynx
 systemctl start mariadb && systemctl enable mariadb
 echo -e "\n\nqwe123\nqwe123\ny\ny\ny\ny\n" | /usr/bin/mysql_secure_installation
