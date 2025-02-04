@@ -31,8 +31,8 @@ resource "aws_route_table" "ase_routetable" {
     apub1 = {}
     apri3 = {}
     apri4 = {}
-    adns5 = {}
-    adns6 = {}
+    avpn5 = {}
+    avpn6 = {}
   }
   vpc_id = aws_vpc.ase_vpc.id
   tags = {
@@ -47,8 +47,8 @@ resource "aws_route_table_association" "ase_routetable_association" {
       asn2 = {route_table_id=aws_route_table.ase_routetable["apub1"].id, subnet_id=aws_subnet.ase_subnet["asn2"].id}
       asn3 = {route_table_id=aws_route_table.ase_routetable["apri3"].id, subnet_id=aws_subnet.ase_subnet["asn3"].id}
       asn4 = {route_table_id=aws_route_table.ase_routetable["apri4"].id, subnet_id=aws_subnet.ase_subnet["asn4"].id}
-      asn5 = {route_table_id=aws_route_table.ase_routetable["adns5"].id, subnet_id=aws_subnet.ase_subnet["asn5"].id}
-      asn6 = {route_table_id=aws_route_table.ase_routetable["adns6"].id, subnet_id=aws_subnet.ase_subnet["asn6"].id}
+      asn5 = {route_table_id=aws_route_table.ase_routetable["avpn5"].id, subnet_id=aws_subnet.ase_subnet["asn5"].id}
+      asn6 = {route_table_id=aws_route_table.ase_routetable["avpn6"].id, subnet_id=aws_subnet.ase_subnet["asn6"].id}
     }
   route_table_id = each.value.route_table_id
   subnet_id = each.value.subnet_id
