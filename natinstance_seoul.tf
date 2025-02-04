@@ -32,10 +32,6 @@ resource "aws_instance" "ase_instance_nat1" {
   user_data = <<EOF
 #!/bin/bash
 yum -y install tcpdump iptraf
-cat<<EOT >> /etc/resolv.conf
-nameserver 10.1.5.250
-nameserver 10.1.6.250
-EOT
 EOF
 }
 
@@ -56,9 +52,6 @@ resource "aws_instance" "ase_instance_nat2" {
   user_data = <<EOF
 #!/bin/bash
 yum -y install tcpdump iptraf
-cat<<EOT >> /etc/resolv.conf
-nameserver 10.1.5.250
-nameserver 10.1.6.250
-EOT
+
 EOF
 }

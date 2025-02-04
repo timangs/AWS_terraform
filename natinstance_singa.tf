@@ -24,9 +24,5 @@ resource "aws_instance" "asi_instance_nat1" {
 #!/bin/bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 yum -y install tcpdump
-cat<<EOT >> /etc/resolv.conf
-nameserver 10.3.5.250
-nameserver 10.3.6.250
-EOT
 EOF
 }

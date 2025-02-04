@@ -1,16 +1,15 @@
-
 resource "aws_route53_resolver_endpoint" "ase_inbound" {
   provider = aws.se
   direction = "INBOUND"
   name      = "ase_inbound"
   security_group_ids = [aws_security_group.ase_securitygroup.id]
   ip_address {
-    subnet_id = aws_subnet.ase_subnet["asn5"].id
-    ip        = "10.1.5.250"
+    subnet_id = aws_subnet.ase_subnet["asn3"].id
+    ip        = "10.1.3.250"
   }
   ip_address {
-    subnet_id = aws_subnet.ase_subnet["asn6"].id
-    ip        = "10.1.6.250"
+    subnet_id = aws_subnet.ase_subnet["asn4"].id
+    ip        = "10.1.4.250"
   }
   tags = {
     Name = "ase_inbound"
@@ -23,12 +22,12 @@ resource "aws_route53_resolver_endpoint" "ase_outbound" {
   name      = "ase_outbound"
   security_group_ids = [aws_security_group.ase_securitygroup.id]
   ip_address {
-    subnet_id = aws_subnet.ase_subnet["asn5"].id
-    ip        = "10.1.5.251"
+    subnet_id = aws_subnet.ase_subnet["asn3"].id
+    ip        = "10.1.3.251"
   }
   ip_address {
-    subnet_id = aws_subnet.ase_subnet["asn6"].id
-    ip        = "10.1.6.251"
+    subnet_id = aws_subnet.ase_subnet["asn4"].id
+    ip        = "10.1.4.251"
   }
   tags = {
     Name = "ase_outbound"
@@ -84,6 +83,7 @@ resource "aws_route53_resolver_rule" "ase_rule3" {
   }
 }
 
+
 resource "aws_route53_resolver_rule_association" "ase_rule1_association" {
   provider = aws.se
   name             = "ase_rule1_association"
@@ -104,3 +104,4 @@ resource "aws_route53_resolver_rule_association" "ase_rule3_association" {
   resolver_rule_id = aws_route53_resolver_rule.ase_rule3.id
   vpc_id           = aws_vpc.ase_vpc.id
 }
+#########################################################################
