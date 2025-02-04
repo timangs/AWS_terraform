@@ -5,7 +5,7 @@ resource "aws_instance" "asi_instance_web1" {
   instance_type = var.instance_type
   # associate_public_ip_address = "true"
   private_ip = "10.3.3.100"
-  subnet_id = aws_subnet.ase_subnet["asn3"].id
+  subnet_id = aws_subnet.asi_subnet["asn3"].id
   security_groups = [aws_security_group.asi_securitygroup.id]
   tags = {
     Name = "asi_instance_web1"

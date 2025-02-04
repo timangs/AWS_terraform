@@ -36,7 +36,7 @@ resource "aws_route_table" "idc-cgw" {
   provider = aws.seoul
   vpc_id = aws_vpc.idc-seoul.id
   tags = {
-    Name = "idc-seoul-public"
+    Name = "idc-seoul-cgw"
   }
 }
 resource "aws_internet_gateway" "idc-seoul" {

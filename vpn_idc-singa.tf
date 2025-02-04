@@ -45,6 +45,39 @@ resource "aws_route" "singa-vpn-route" {
   depends_on                = [aws_ec2_transit_gateway_vpc_attachment.singa]
 }
 
+
+resource "aws_route" "cgw_singa_vpn" {
+  provider = aws.singa
+  for_each = {
+    1 = {
+      route_table_id= module.idc-singa.route_table_id
+      destination_cidr_block = "10.1.0.0/16",
+      network_interface_id = aws_instance.idc-singa_cgw.primary_network_interface_id
+    }
+    2 = {
+      route_table_id= module.idc-singa.route_table_id
+      destination_cidr_block = "10.2.0.0/16",
+      network_interface_id = aws_instance.idc-singa_cgw.primary_network_interface_id
+    }
+    3 = {
+      route_table_id= module.idc-singa.route_table_id
+      destination_cidr_block = "10.3.0.0/16",
+      network_interface_id = aws_instance.idc-singa_cgw.primary_network_interface_id
+    }
+  }
+  route_table_id = each.value.route_table_id
+  destination_cidr_block = each.value.destination_cidr_block
+  network_interface_id = each.value.network_interface_id
+  depends_on = [ aws_instance.idc-singa_cgw]
+}
+
+resource "aws_ec2_transit_gateway_route" "idc-singa-to-10-3" {
+  provider = aws.singa
+  destination_cidr_block      = "10.3.0.0/16"
+  transit_gateway_attachment_id = aws_vpn_connection.idc-singa.transit_gateway_attachment_id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway.singa.association_default_route_table_id
+}
+
 resource "aws_network_interface" "idc-singa_cgw_eni" {
   provider          = aws.singa
   subnet_id         = module.idc-singa.cgw_subnet_id
@@ -55,6 +88,7 @@ resource "aws_network_interface" "idc-singa_cgw_eni" {
     Name = "idc-singa_cgw_eni"
   }
 }
+
 resource "aws_eip" "idc-singa_cgw_eip" { 
     provider = aws.singa
     network_interface = aws_network_interface.idc-singa_cgw_eni.id
@@ -103,7 +137,7 @@ conn Tunnel1
   keyingtries=%forever
   keyexchange=ike
   leftsubnet=10.4.0.0/16
-  rightsubnet=10.3.0.0/16
+  rightsubnet=10.0.0.0/8
   dpddelay=10
   dpdtimeout=30
   dpdaction=restart_by_peer
@@ -122,7 +156,7 @@ conn Tunnel2
   keyingtries=%forever
   keyexchange=ike
   leftsubnet=10.4.0.0/16
-  rightsubnet=10.3.0.0/16
+  rightsubnet=10.0.0.0/8
   dpddelay=10
   dpdtimeout=30
   dpdaction=restart_by_peer

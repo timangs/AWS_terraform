@@ -105,7 +105,6 @@ ns1    IN A  10.4.1.200
 ; Hosts
 db     IN A  10.4.1.100
 dns    IN A  10.4.1.200
-cgw    IN A  10.4.1.50
 EOT
 # Create reverse zone file
 cat <<EOT > /var/named/db.10.4
@@ -122,7 +121,6 @@ cat <<EOT > /var/named/db.10.4
 ; PTR Records
 100.1    IN PTR db.idcsinga.internal.  ; TTL 86400
 200.1    IN PTR dns.idcsinga.internal. ; TTL 86400
-50.1     IN PTR cgw.idcsinga.internal.  ; TTL 86400
 EOT
 # Set permissions and restart BIND
 chown named:named /var/named/db.idcsinga.internal /var/named/db.10.4

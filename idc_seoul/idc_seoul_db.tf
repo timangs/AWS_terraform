@@ -28,7 +28,7 @@ sudo amazon-linux-extras install epel -y
 sudo yum install sshpass -y
 mysqldump --defaults-extra-file=/root/.my.cnf --all-databases --lock-all-tables --events > /home/ec2-user/mysql_dump.sql
 sshpass -p 'toor' scp -o StrictHostKeyChecking=no mysql_dump.sql root@10.4.1.100:/root/seoul.sql
-cat <<EOD> /etc/my.cnf.d/mariadb-server.cnf
+cat <<EOD > /etc/my.cnf.d/mariadb-server.cnf
 [mysqld]
 datadir=/var/lib/mysql
 socket=/var/lib/mysql/mysql.sock

@@ -13,6 +13,6 @@ output "vpn_rt_id" {
   value = aws_route_table.singa["vpn"].id
 }
 
-# output "outbound_endpoint_id" {
-#   value = aws_route53_resolver_endpoint.outbound.id
-# }
+output "outbound_endpoint_id" {
+  value = aws_route53_resolver_endpoint.outbound.id
+}

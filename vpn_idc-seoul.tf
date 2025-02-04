@@ -45,6 +45,39 @@ resource "aws_route" "seoul-vpn-route" {
   depends_on                = [aws_ec2_transit_gateway_vpc_attachment.seoul]
 }
 
+resource "aws_route" "cgw_seoul_vpn" {
+  provider = aws.seoul
+  for_each = {
+    1 = {
+      route_table_id= module.idc-seoul.route_table_id
+      destination_cidr_block = "10.1.0.0/16",
+      network_interface_id = aws_instance.idc-seoul_cgw.primary_network_interface_id
+    }
+    2 = {
+      route_table_id= module.idc-seoul.route_table_id
+      destination_cidr_block = "10.3.0.0/16",
+      network_interface_id = aws_instance.idc-seoul_cgw.primary_network_interface_id
+    }
+    3 = {
+      route_table_id= module.idc-seoul.route_table_id
+      destination_cidr_block = "10.4.0.0/16",
+      network_interface_id = aws_instance.idc-seoul_cgw.primary_network_interface_id
+    }
+  }
+  route_table_id = each.value.route_table_id
+  destination_cidr_block = each.value.destination_cidr_block
+  network_interface_id = each.value.network_interface_id
+  depends_on = [ aws_instance.idc-seoul_cgw ]
+}
+
+resource "aws_ec2_transit_gateway_route" "idc-seoul-to-10-1" {
+  provider = aws.seoul
+  destination_cidr_block      = "10.1.0.0/16"
+  transit_gateway_attachment_id = aws_vpn_connection.idc-seoul.transit_gateway_attachment_id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway.seoul.association_default_route_table_id
+}
+
+
 resource "aws_network_interface" "idc-seoul_cgw_eni" {
   provider          = aws.seoul
   subnet_id         = module.idc-seoul.cgw_subnet_id
@@ -74,7 +107,7 @@ resource "aws_instance" "idc-seoul_cgw" {
   user_data = <<EOE
 #!/bin/bash
 yum -y install tcpdump openswan
-cat <<EOF>> /etc/sysctl.conf
+cat <<EOF >> /etc/sysctl.conf
 net.ipv4.ip_forward=1
 net.ipv4.conf.all.accept_redirects = 0
 net.ipv4.conf.all.send_redirects = 0
@@ -88,7 +121,7 @@ net.ipv4.conf.default.rp_filter = 0
 net.ipv4.conf.all.rp_filter = 0
 EOF
 sysctl -p /etc/sysctl.conf
-cat <<EOF> /etc/ipsec.d/aws.conf
+cat <<EOF > /etc/ipsec.d/aws.conf
 conn Tunnel1
   authby=secret
   auto=start
@@ -103,7 +136,7 @@ conn Tunnel1
   keyingtries=%forever
   keyexchange=ike
   leftsubnet=10.2.0.0/16
-  rightsubnet=10.1.0.0/16
+  rightsubnet=10.0.0.0/8
   dpddelay=10
   dpdtimeout=30
   dpdaction=restart_by_peer
@@ -122,13 +155,13 @@ conn Tunnel2
   keyingtries=%forever
   keyexchange=ike
   leftsubnet=10.2.0.0/16
-  rightsubnet=10.1.0.0/16
+  rightsubnet=10.0.0.0/8
   dpddelay=10
   dpdtimeout=30
   dpdaction=restart_by_peer
   overlapip=yes
 EOF
-cat <<EOF> /etc/ipsec.d/aws.secrets
+cat <<EOF > /etc/ipsec.d/aws.secrets
 ${aws_eip.idc-seoul_cgw_eip.public_ip} ${aws_vpn_connection.idc-seoul.tunnel1_address} ${aws_vpn_connection.idc-seoul.tunnel2_address} : PSK "psk_timangs"
 EOF
 systemctl start ipsec
