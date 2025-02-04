@@ -31,7 +31,7 @@ sed -i 's/dnssec-enable yes;/dnssec-enable no;/g' /etc/named.conf
 cat <<EOT >> /etc/named.rfc1912.zones
 zone "idcsinga.internal" {
     type master;
-    file "/var/named/idcsp.internal.zone";
+    file "/var/named/idcsinga.internal.zone";
 };
 
 zone "awsseoul.internal" {
@@ -50,15 +50,15 @@ zone "idcseoul.internal" {
 };
 EOT
 
-cat <<EOT > /var/named/idcsp.internal.zone
+cat <<EOT > /var/named/idcsinga.internal.zone
 \$TTL 86400
-@   IN  SOA     ns.idcsp.internal. admin.idcsp.internal. (
+@   IN  SOA     ns.idcsinga.internal. admin.idcsinga.internal. (
         2025010801 ; Serial
         3600       ; Refresh
         1800       ; Retry
         1209600    ; Expire
         86400 )    ; Minimum TTL
-@       IN  NS      ns.idcsp.internal.
+@       IN  NS      ns.idcsinga.internal.
 ns      IN  A       10.4.1.200
 dns     IN  A       10.4.1.200
 db      IN  A       10.4.1.100
@@ -66,7 +66,7 @@ EOT
 
 chown root:named /etc/named.conf /var/named/idcsinga.internal.zone
 chmod 640 /etc/named.conf
-chmod 640 /var/named/idcsp.internal.zone
+chmod 640 /var/named/idcsinga.internal.zone
 
 systemctl enable named
 systemctl start named

@@ -37,7 +37,7 @@ resource "aws_route53_resolver_endpoint" "asi_outbound" {
 resource "aws_route53_resolver_rule" "asi_rule1" {
   provider = aws.si
   rule_type           = "FORWARD"
-  domain_name         = "idcsinga.internal"
+  domain_name         = "idcsinga.internal."
   name                = "asi_rule1"
   resolver_endpoint_id = aws_route53_resolver_endpoint.asi_outbound.id
   target_ip {
@@ -52,7 +52,7 @@ resource "aws_route53_resolver_rule" "asi_rule1" {
 resource "aws_route53_resolver_rule" "asi_rule2" {
   provider = aws.si
   rule_type           = "FORWARD"
-  domain_name         = "awsseoul.internal"
+  domain_name         = "awsseoul.internal."
   name                = "asi_rule2"
   resolver_endpoint_id = aws_route53_resolver_endpoint.asi_outbound.id
   target_ip {
@@ -71,7 +71,7 @@ resource "aws_route53_resolver_rule" "asi_rule2" {
 resource "aws_route53_resolver_rule" "asi_rule3" {
   provider = aws.si
   rule_type           = "FORWARD"
-  domain_name         = "idcseoul.internal"
+  domain_name         = "idcseoul.internal."
   name                = "asi_rule3"
   resolver_endpoint_id = aws_route53_resolver_endpoint.asi_outbound.id
   target_ip {

@@ -1,6 +1,6 @@
 resource "aws_customer_gateway" "isi_cgw" {
   provider = aws.si
-  bgp_asn    = 65000
+  bgp_asn    = 65001
   ip_address = aws_eip.isi_cgwinstance_eip.public_ip
   type       = "ipsec.1"
 

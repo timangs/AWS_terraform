@@ -37,7 +37,7 @@ resource "aws_route53_resolver_endpoint" "ase_outbound" {
 resource "aws_route53_resolver_rule" "ase_rule1" {
   provider = aws.se
   rule_type           = "FORWARD"
-  domain_name         = "idcsinga.internal"
+  domain_name         = "idcsinga.internal."
   name                = "ase_rule1"
   resolver_endpoint_id = aws_route53_resolver_endpoint.ase_outbound.id
   target_ip {
@@ -52,7 +52,7 @@ resource "aws_route53_resolver_rule" "ase_rule1" {
 resource "aws_route53_resolver_rule" "ase_rule2" {
   provider = aws.se
   rule_type           = "FORWARD"
-  domain_name         = "awssinga.internal"
+  domain_name         = "awssinga.internal."
   name                = "ase_rule2"
   resolver_endpoint_id = aws_route53_resolver_endpoint.ase_outbound.id
   target_ip {
@@ -71,7 +71,7 @@ resource "aws_route53_resolver_rule" "ase_rule2" {
 resource "aws_route53_resolver_rule" "ase_rule3" {
   provider = aws.se
   rule_type           = "FORWARD"
-  domain_name         = "idcseoul.internal"
+  domain_name         = "idcseoul.internal."
   name                = "ase_rule3"
   resolver_endpoint_id = aws_route53_resolver_endpoint.ase_outbound.id
   target_ip {
