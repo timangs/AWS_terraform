@@ -1,42 +1,47 @@
 provider "aws" {
-  alias = "singa"
+  alias = "si"
   region = "ap-southeast-1"
 }
 
 provider "aws" {
-  alias = "seoul"
+  alias = "se"
   region = "ap-northeast-2"
 }
 
 
 # key pair
-variable "seoulkey" {
+variable "se_key" {
   description = "Seoul Key pair name"
   type = string
   default = "soldesk-key"
 }
-variable "singakey" {
+variable "si_key" {
   description = "singapore Key pair name"
   type = string
   default = "soldesk-key-singapore"
 }
 
 # ami
-variable "seoul-nat-ami" {
+variable "se_nat_ami" {
   type = string
   default = "ami-0c2d3e23e757b5d84"
 }
-variable "seoul-ami" {
+variable "se_ami" {
   type = string
   default = "ami-04c535bac3bf07b9a"
 }
-variable "singa-nat-ami" {
+variable "si_nat_ami" {
   type = string
   default = "ami-097c9351ea0aa8d71"
 }
-variable "singa-ami" {
+variable "si_ami" {
   type = string
   default = "ami-0de20ddce8ba98c24"
 }
 
 
+variable "instance_type" {
+  description = "Instance t2.micro"
+  type        = string
+  default     = "t2.micro"
+}

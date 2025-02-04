@@ -6,6 +6,7 @@ resource "aws_instance" "isi_db_instance" {
   private_ip = "10.4.1.100"
   key_name = var.si_key
   subnet_id = aws_subnet.isi_subnet["isn1"].id
+  associate_public_ip_address = true
   security_groups = [aws_security_group.isi_securitygroup.id]
   source_dest_check = false
   tags = {
@@ -15,6 +16,7 @@ resource "aws_instance" "isi_db_instance" {
 #!/bin/bash
 
 yum install -y mariadb-server mariadb lynx
+sleep 100
 systemctl start mariadb && systemctl enable mariadb
 echo -e "\n\nqwe123\nqwe123\ny\ny\ny\ny\n" | /usr/bin/mysql_secure_installation
 mysql -uroot -pqwe123 -e "CREATE DATABASE sample; GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%' IDENTIFIED BY 'qwe123'; GRANT REPLICATION SLAVE ON *.* TO 'repl_user'@'%' IDENTIFIED BY 'qwe123'; flush privileges;"

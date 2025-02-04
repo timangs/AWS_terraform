@@ -42,7 +42,7 @@ resource "aws_route53_resolver_rule" "ase_rule1" {
   name                = "ase_rule1"
   resolver_endpoint_id = aws_route53_resolver_endpoint.ase_outbound.id
   target_ip {
-    ip   = "10.4.1.100"
+    ip   = "10.4.1.200"
     port = 53
   }
   tags = {
@@ -76,7 +76,7 @@ resource "aws_route53_resolver_rule" "ase_rule3" {
   name                = "ase_rule3"
   resolver_endpoint_id = aws_route53_resolver_endpoint.ase_outbound.id
   target_ip {
-    ip   = "10.2.1.100"
+    ip   = "10.2.1.200"
     port = 53
   }
   tags = {
