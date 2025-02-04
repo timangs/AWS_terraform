@@ -4,12 +4,12 @@ resource "aws_route53_resolver_endpoint" "asi_inbound" {
   name      = "asi_inbound"
   security_group_ids = [aws_security_group.asi_securitygroup.id]
   ip_address {
-    subnet_id = aws_subnet.asi_subnet["asn3"].id
-    ip        = "10.3.3.250"
+    subnet_id = aws_subnet.asi_subnet["asn1"].id
+    ip        = "10.3.1.250"
   }
   ip_address {
-    subnet_id = aws_subnet.asi_subnet["asn4"].id
-    ip        = "10.3.4.250"
+    subnet_id = aws_subnet.asi_subnet["asn2"].id
+    ip        = "10.3.2.250"
   }
   tags = {
     Name = "asi_inbound"
@@ -56,11 +56,11 @@ resource "aws_route53_resolver_rule" "asi_rule2" {
   name                = "asi_rule2"
   resolver_endpoint_id = aws_route53_resolver_endpoint.asi_outbound.id
   target_ip {
-    ip   = "10.1.3.250"
+    ip   = "10.1.1.250"
     port = 53
   }
   target_ip {
-    ip   = "10.1.4.250"
+    ip   = "10.1.2.250"
     port = 53
   }
   tags = {

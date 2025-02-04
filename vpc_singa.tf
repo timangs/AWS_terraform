@@ -11,6 +11,7 @@ resource "aws_subnet" "asi_subnet" {
   provider = aws.si
   for_each = {
     asn1 = {cidr_block="10.3.1.0/24",availability_zone="ap-southeast-1a"}
+    asn2 = {cidr_block="10.3.2.0/24",availability_zone="ap-southeast-1a"}
     asn3 = {cidr_block="10.3.3.0/24",availability_zone="ap-southeast-1a"}
     asn4 = {cidr_block="10.3.4.0/24",availability_zone="ap-southeast-1a"}
     asn5 = {cidr_block="10.3.5.0/24",availability_zone="ap-southeast-1a"}
