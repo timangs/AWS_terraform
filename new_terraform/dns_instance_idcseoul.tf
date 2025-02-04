@@ -39,12 +39,12 @@ zone "awsseoul.internal" {
     forwarders { 10.1.3.250; 10.1.4.250; };
 };
 
-zone "awssp.internal" {
+zone "awssinga.internal" {
     type forward;
     forwarders { 10.3.3.250; 10.3.4.250; };
 };
 
-zone "idcsp.internal" {
+zone "idcsinga.internal" {
     type forward;
     forwarders { 10.4.1.200; };
 };

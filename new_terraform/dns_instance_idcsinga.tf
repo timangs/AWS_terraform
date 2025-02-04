@@ -29,7 +29,7 @@ sed -i 's/dnssec-validation yes;/dnssec-validation no;/g' /etc/named.conf
 sed -i 's/dnssec-enable yes;/dnssec-enable no;/g' /etc/named.conf
 
 cat <<EOT >> /etc/named.rfc1912.zones
-zone "idcsp.internal" {
+zone "idcsinga.internal" {
     type master;
     file "/var/named/idcsp.internal.zone";
 };
@@ -39,7 +39,7 @@ zone "awsseoul.internal" {
     forwarders { 10.1.3.250; 10.1.4.250; };
 };
 
-zone "awssp.internal" {
+zone "awssinga.internal" {
     type forward;
     forwarders { 10.3.3.250; 10.3.4.250;};
 };
@@ -64,7 +64,7 @@ dns     IN  A       10.4.1.200
 db      IN  A       10.4.1.100
 EOT
 
-chown root:named /etc/named.conf /var/named/idcsp.internal.zone
+chown root:named /etc/named.conf /var/named/idcsinga.internal.zone
 chmod 640 /etc/named.conf
 chmod 640 /var/named/idcsp.internal.zone
 

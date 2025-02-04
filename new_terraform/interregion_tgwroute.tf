@@ -18,7 +18,7 @@ resource "aws_ec2_transit_gateway_route" "se_tgw_route4" {
     aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peeringattach_accepter
   ]
 }
-####################################################################################################################################
+####################################################################################
 resource "aws_ec2_transit_gateway_route" "si_tgw_route1" {
   provider = aws.si
   transit_gateway_route_table_id = aws_ec2_transit_gateway.si_tgw.association_default_route_table_id
