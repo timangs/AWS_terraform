@@ -118,6 +118,7 @@ Global Accelerator는 AWS 글로벌 네트워크를 활용하여 사용자와 �
 - Endpoint: 트래픽을 수신하는 실제 리소스 (ALB, NLB, EC2 인스턴스, Elastic IP 주소)입니다.
 ----
 ### Inter-region VPC peering
+
 서로 다른 AWS 리전에 있는 VPC 간에 트래픽을 라우팅할 수 있도록 연결하는 서비스입니다. Peering 연결을 통해 VPC는 마치 하나의 네트워크처럼 통신할 수 있습니다.
 ![image](https://github.com/user-attachments/assets/88919b69-aca7-4386-b522-8d898cd7e8fd)
 - Transit Gateway
@@ -132,10 +133,16 @@ Route 53 Resolver를 사용하여 Private Hosted Zone에 대한 DNS 쿼리를 �
 - Inbound Endpoint: 온프레미스 DNS 서버에서 VPC 내 Private Hosted Zone으로 DNS 쿼리를 전달하는 데 사용됩니다.
 - Outbound Endpoint: VPC 내에서 온프레미스 DNS 서버로 DNS 쿼리를 전달하는 데 사용됩니다.
 - Private Hosted Zone: VPC 내에서만 확인 가능한 DNS 레코드를 관리하는 Hosted Zone입니다.
+
 ![image](https://github.com/user-attachments/assets/a0d43f27-c61c-4215-8267-dad016aa9793)
+
 ----
+
 - Inbound/Outbound Endpoint Resolver
 ![image](https://github.com/user-attachments/assets/2f369621-77db-4a84-a3ab-da994bb47079)
 ----
 ### DB Replication
+
 데이터베이스 복제를 통해 가용성과 재해 복구 기능을 향상시킵니다. 리전 간 복제를 통해 지리적 이중화를 제공할 수 있습니다. 사용하는 데이터베이스 서비스에 따라 구체적인 방법이 달라집니다. (예: RDS, Aurora, DynamoDB 등)
+
+![image](https://github.com/user-attachments/assets/248bf8f1-5b2b-447a-aef7-f167f3f86c8a)
