@@ -2,18 +2,25 @@
 
 
 ## terraform user 권한 설정
+
 ----
+
 ![image](https://github.com/user-attachments/assets/4fc5def1-6db5-44bb-89a6-b03cf2904593)
 
 ----
+
 ## 필요 구현사항
 ----
 ### VPN
+
 Site-to-Site VPN은 온프레미스 네트워크와 AWS VPC를 사설 IP 대역을 사용하여 안전하게 연결하는 서비스입니다. VPN 터널을 통해 암호화된 통신을 제공합니다.
+
 - 구성 요소
+
 | Virtual Private Gateway (VGW): AWS 측 VPN 연결 지점입니다. VPC에 연결됩니다.
 | Customer Gateway (CGW): 온프레미스 측 VPN 장비 또는 소프트웨어를 나타냅니다. CGW의 Public IP 주소가 필요합니다.
 | VPN Connection: VGW와 CGW 간의 연결을 정의합니다. 두 개의 VPN 터널로 구성되어 고가용성을 제공합니다.
+
 ![image](https://github.com/user-attachments/assets/669f684f-dad9-402c-baff-8c6bfc61f6bf)
 ----
 - Customer Gateway
@@ -21,6 +28,7 @@ Site-to-Site VPN은 온프레미스 네트워크와 AWS VPC를 사설 IP 대역�
 ### NAT
 NAT Gateway는 Private Subnet의 인스턴스가 인터넷에 연결할 수 있도록 아웃바운드 트래픽을 허용하는 서비스입니다.
 ![image](https://github.com/user-attachments/assets/04f39d39-dc6f-42c8-a27d-bd9132991dda)
+
 ----
 ### ELB
 ELB는 트래픽을 여러 EC2 인스턴스, 컨테이너 또는 IP 주소로 분산하여 애플리케이션의 가용성과 내결함성을 향상시키는 서비스입니다.
@@ -31,6 +39,9 @@ ELB는 트래픽을 여러 EC2 인스턴스, 컨테이너 또는 IP 주소로 �
 ----
 ### GA(Global Accelerator)
 Global Accelerator는 AWS 글로벌 네트워크를 활용하여 사용자와 가장 가까운 엣지 로케이션으로 트래픽을 라우팅하여 애플리케이션의 성능과 가용성을 향상시키는 서비스입니다.
+![image](https://github.com/user-attachments/assets/2c129841-154b-42c4-bb00-4fca71382abb)
+![image](https://github.com/user-attachments/assets/d44f1a77-7b4a-458b-b81a-f4441bb2722f)
+
 - 구성 요소
 | Accelerator: Global Accelerator의 기본 리소스입니다.
 | Listener: Accelerator에서 트래픽을 수신하는 포트와 프로토콜을 정의합니다.
