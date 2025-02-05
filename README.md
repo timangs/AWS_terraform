@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/0a4a7312-4fea-445c-9d6c-e96c30c77a69)
+![image](https://github.com/user-attachments/assets/301f9b1a-c155-4ca7-83e2-563031effe78)
 
 
 [1. 사용 권한 설정](##terraform-user-권한-설정)
