@@ -1,6 +1,6 @@
 resource "aws_vpc_dhcp_options" "ase_dhcp" {
   provider = aws.se
-  domain_name_servers = ["10.1.3.250","10.1.4.250"]
+  domain_name_servers = ["10.1.1.250","10.1.2.250"]
     tags = {
         Name = "ase_dhcp"
     }
