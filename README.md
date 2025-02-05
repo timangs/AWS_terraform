@@ -37,16 +37,68 @@ Site-to-Site VPN은 온프레미스 네트워크와 AWS VPC를 사설 IP 대역�
 - VPN Connection: VGW와 CGW 간의 연결을 정의합니다. 두 개의 VPN 터널로 구성되어 고가용성을 제공합니다.
 
 ![image](https://github.com/user-attachments/assets/669f684f-dad9-402c-baff-8c6bfc61f6bf)
+
+```
+resource "aws_vpn_connection" "isi_cgw_vpnconnection" {
+  provider = aws.si
+  customer_gateway_id = aws_customer_gateway.isi_cgw.id
+  transit_gateway_id  = aws_ec2_transit_gateway.si_tgw.id
+  type                = "ipsec.1"
+  static_routes_only = true
+  tunnel1_preshared_key = "psk_timangs" 
+  tunnel2_preshared_key = "psk_timangs"
+  tags = {
+    Name = "isi_cgw_vpnconnection"
+  }
+}
+
+resource "aws_route" "isi_vpn1_route" {
+  provider = aws.si
+  route_table_id = aws_route_table.isi_routetable["ipub1"].id
+  destination_cidr_block = "10.1.0.0/16"
+  network_interface_id = aws_instance.isi_cgw_instance.primary_network_interface_id
+}
+
+resource "aws_route" "isi_vpn3_route" {
+  provider = aws.si
+  route_table_id = aws_route_table.isi_routetable["ipub1"].id
+  destination_cidr_block = "10.2.0.0/16"
+  network_interface_id = aws_instance.isi_cgw_instance.primary_network_interface_id
+}
+
+resource "aws_route" "isi_vpn4_route" {
+  provider = aws.si
+  route_table_id = aws_route_table.isi_routetable["ipub1"].id
+  destination_cidr_block = "10.3.0.0/16"
+  network_interface_id = aws_instance.isi_cgw_instance.primary_network_interface_id
+}
+
+resource "aws_ec2_transit_gateway_route" "asi_vpn_route" {
+  provider = aws.si
+  destination_cidr_block         = "10.4.0.0/16"
+  transit_gateway_attachment_id  = aws_vpn_connection.isi_cgw_vpnconnection.transit_gateway_attachment_id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway.si_tgw.association_default_route_table_id
+}
+
+resource "aws_route" "asi_vpn_route" {
+  provider = aws.si
+  route_table_id            = aws_route_table.asi_routetable["apub1"].id
+  destination_cidr_block    = "10.4.0.0/16"
+  transit_gateway_id = aws_ec2_transit_gateway.si_tgw.id
+}
+```
 ----
 - Customer Gateway
 ----
 ### NAT
 NAT Gateway는 Private Subnet의 인스턴스가 인터넷에 연결할 수 있도록 아웃바운드 트래픽을 허용하는 서비스입니다.
+
 ![image](https://github.com/user-attachments/assets/04f39d39-dc6f-42c8-a27d-bd9132991dda)
 
 ----
 ### ELB
 ELB는 트래픽을 여러 EC2 인스턴스, 컨테이너 또는 IP 주소로 분산하여 애플리케이션의 가용성과 내결함성을 향상시키는 서비스입니다.
+
 ![image](https://github.com/user-attachments/assets/c06a33c5-0381-4391-967a-bf04037e0643)
 > 종류
 - Application Load Balancer (ALB): HTTP/HTTPS 트래픽 (Layer 7) 로드밸런싱에 적합합니다. 경로 기반 라우팅, 호스트 기반 라우팅 등 고급 기능 제공.
