@@ -13,12 +13,12 @@ provider "aws" {
 variable "se_key" {
   description = "Seoul Key pair name"
   type = string
-  default = "soldesk-key"
+  default = "Instance-key"
 }
 variable "si_key" {
   description = "singapore Key pair name"
   type = string
-  default = "soldesk-key-singapore"
+  default = "Instance-key-si"
 }
 
 # ami

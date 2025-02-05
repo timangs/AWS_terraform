@@ -11,7 +11,7 @@ resource "aws_security_group" "isi_securitygroup" {
       {from=22, to=22, protocol="tcp", cidr=["0.0.0.0/0"]},
       {from=-1, to=-1, protocol="icmp", cidr=["0.0.0.0/0"]},
       {from=4500, to=4500, protocol="udp", cidr=["0.0.0.0/0"]},
-      {from=3306, to=3306, protocol="udp", cidr=["0.0.0.0/0"]},
+      {from=3306, to=3306, protocol="tcp", cidr=["0.0.0.0/0"]},
       {from=179, to=179, protocol="tcp", cidr=["0.0.0.0/0"]},
       {from=500, to=500, protocol="udp", cidr=["0.0.0.0/0"]}
     ]
