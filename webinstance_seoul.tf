@@ -21,6 +21,10 @@ yum install -y httpd
 systemctl start httpd
 systemctl enable httpd
 echo "<h1>Seoul AWS Private Instance 10.1.3.100</h1>" > /var/www/html/index.html
+yum install -y git
+wget -r -np -nH --cut-dirs=2 -A "*.sh,*.sh,*.txt,*.conf" -R "*" https://github.com/timangs/initial_configuration_terraform/tree/main/web_sample/
+#/root/tree/main/web_sample에 받아짐
+mv /root/initial_configuration_terraform/web_sample/* /var/www/html/
 EOF
 }
 

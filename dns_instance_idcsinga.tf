@@ -36,12 +36,12 @@ zone "idcsinga.internal" {
 
 zone "awsseoul.internal" {
     type forward;
-    forwarders { 10.1.1.250; 10.1.2.250; };
+    forwarders { 10.1.3.250; 10.1.4.250; };
 };
 
 zone "awssinga.internal" {
     type forward;
-    forwarders { 10.3.1.250; 10.3.2.250;};
+    forwarders { 10.3.3.250; 10.3.4.250;};
 };
 
 zone "idcseoul.internal" {

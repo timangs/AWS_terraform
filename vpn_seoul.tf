@@ -11,3 +11,20 @@ resource "aws_route" "ase_vpn_route" {
   destination_cidr_block    = "10.2.0.0/16"
   transit_gateway_id = aws_ec2_transit_gateway.se_tgw.id
 }
+
+resource "aws_route" "ase_vpn3_route" {
+  provider = aws.se
+  route_table_id            = aws_route_table.ase_routetable["apri3"].id
+  destination_cidr_block    = "10.0.0.0/8"
+  transit_gateway_id = aws_ec2_transit_gateway.se_tgw.id
+}
+
+resource "aws_route" "ase_vpn4_route" {
+  provider = aws.se
+  route_table_id            = aws_route_table.ase_routetable["apri4"].id
+  destination_cidr_block    = "10.0.0.0/8"
+  transit_gateway_id = aws_ec2_transit_gateway.se_tgw.id
+}
+
+
+#apri3
