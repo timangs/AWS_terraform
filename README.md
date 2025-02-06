@@ -1,6 +1,7 @@
+# 생성될 구성의 기본 형태
 ![image](https://github.com/user-attachments/assets/301f9b1a-c155-4ca7-83e2-563031effe78)
 
-
+<!-- 목차만들거임
 [1. 사용 권한 설정](##terraform-user-권한-설정)
 
 [2. VPN](###-VPN)
@@ -14,9 +15,9 @@
 [6. Inter-region](###-inter-region)
 
 [7. DNS](###-DNS)
+-->
 
-
-## terraform user 권한 설정
+## 사용된 Terraform User 권한 설정
 
 ----
 
@@ -24,8 +25,109 @@
 
 ----
 
-## 필요 구현사항
+# 필요 구현사항
+
+### Prerequisite
+```
+resource "aws_vpc" "ase_vpc" { ... }
+# VPC의 생성
+
+resource "aws_subnet" "ase_subnet" { ... }
+# 서브넷 생성
+
+resource "aws_route_table" "ase_routetable" { ... }
+# 라우팅 테이블 생성
+
+resource "aws_route_table_association" "ase_routetable_association" { ... }
+# 서브넷과 라우팅 테이블 연결
+
+# vpc_*.tf 내용을 확인하여 자세한 내용 확인 가능
+```
+
+### 1. Internet Gateway
+
+AWS에서는 Instace가 인터넷 통신이 되기 위해서는 3가지 조건이 필요합니다.
+
+> 1. Instance의 Public Ip 부여
+```
+resource "aws_instance" "ase_instance_nat1" {
+  ...
+  associate_public_ip_address = true #이 부분이 True로 설정되어야 Public Ip를 부여받음
+  ...
+}
+```
+
+> 2. Internet gateway 생성
+```
+resource "aws_internet_gateway" "ase_igw" {
+    provider = aws.se
+  vpc_id = aws_vpc.ase_vpc.id
+  tags = {
+    Name = "ase_igw"
+  }
+}
+```
+
+> 3. Internet gateway route 설정
+
+```
+resource "aws_route" "ase_igw_route" {
+    provider = aws.se
+    route_table_id            = aws_route_table.ase_routetable["apub1"].id
+    destination_cidr_block    = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.ase_igw.id
+}
+```
+
+해당 내용에서는 전체(0.0.0.0/0)에 대해서 Internet gateway에 연결했지만 범위를 지정할 수 있습니다.
+
 ----
+
+### NAT (Network Address Translation)
+
+NAT Gateway는 Private Subnet의 인스턴스가 인터넷에 연결할 수 있도록 아웃바운드 트래픽을 허용하는 서비스입니다.
+
+![image](https://github.com/user-attachments/assets/04f39d39-dc6f-42c8-a27d-bd9132991dda)
+
+VPC NAT Gateway를 활용할 수 있지만, 이번 프로젝트에서는 인스턴스가 NAT 역할을 수행하도록 생성합니다.
+
+AWS에서는 Instace가 NAT 역할을 수행하기 위해서는 2가지 조건이 필요합니다.
+
+> 1. Source_dest_check 설정
+
+```
+resource "aws_instance" "ase_instance_nat1" {
+  ...
+  source_dest_check = false #이 부분이 True로 설정되면 출발지 주소와 인스턴스의 주소가 같지않으면 송수신 하지않음 default가 True로 설정됨
+  ...
+}
+```
+
+> 2. User data ip_forward 설정
+
+User data에서 sysctl을 사용하여 ip_forward 값을 1로 변경하여 활성화 시킬 수도 있지만,
+
+AWS에서 제공하는 NAT Instance의 AMI로 인스턴스를 생성 시 1로 설정된 인스턴스로 생성할 수도 있습니다.
+
+```
+cat <<EOF >> /etc/sysctl.conf
+net.ipv4.ip_forward=1
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+net.ipv4.conf.eth0.send_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.eth0.accept_redirects = 0
+net.ipv4.conf.ip_vti0.rp_filter = 0
+net.ipv4.conf.eth0.rp_filter = 0
+net.ipv4.conf.default.rp_filter = 0
+net.ipv4.conf.all.rp_filter = 0
+EOF
+sysctl -p /etc/sysctl.conf
+```
+
+----
+
 ### VPN
 
 Site-to-Site VPN은 온프레미스 네트워크와 AWS VPC를 사설 IP 대역을 사용하여 안전하게 연결하는 서비스입니다. VPN 터널을 통해 암호화된 통신을 제공합니다.
@@ -89,13 +191,7 @@ resource "aws_route" "asi_vpn_route" {
 ```
 ----
 - Customer Gateway
-----
-### NAT
-NAT Gateway는 Private Subnet의 인스턴스가 인터넷에 연결할 수 있도록 아웃바운드 트래픽을 허용하는 서비스입니다.
 
-![image](https://github.com/user-attachments/assets/04f39d39-dc6f-42c8-a27d-bd9132991dda)
-
-----
 ### ELB
 ELB는 트래픽을 여러 EC2 인스턴스, 컨테이너 또는 IP 주소로 분산하여 애플리케이션의 가용성과 내결함성을 향상시키는 서비스입니다.
 
@@ -118,6 +214,7 @@ Global Accelerator는 AWS 글로벌 네트워크를 활용하여 사용자와 �
 - Endpoint: 트래픽을 수신하는 실제 리소스 (ALB, NLB, EC2 인스턴스, Elastic IP 주소)입니다.
 ----
 ### Inter-region VPC peering
+
 서로 다른 AWS 리전에 있는 VPC 간에 트래픽을 라우팅할 수 있도록 연결하는 서비스입니다. Peering 연결을 통해 VPC는 마치 하나의 네트워크처럼 통신할 수 있습니다.
 ![image](https://github.com/user-attachments/assets/88919b69-aca7-4386-b522-8d898cd7e8fd)
 - Transit Gateway
@@ -132,10 +229,16 @@ Route 53 Resolver를 사용하여 Private Hosted Zone에 대한 DNS 쿼리를 �
 - Inbound Endpoint: 온프레미스 DNS 서버에서 VPC 내 Private Hosted Zone으로 DNS 쿼리를 전달하는 데 사용됩니다.
 - Outbound Endpoint: VPC 내에서 온프레미스 DNS 서버로 DNS 쿼리를 전달하는 데 사용됩니다.
 - Private Hosted Zone: VPC 내에서만 확인 가능한 DNS 레코드를 관리하는 Hosted Zone입니다.
+
 ![image](https://github.com/user-attachments/assets/a0d43f27-c61c-4215-8267-dad016aa9793)
+
 ----
+
 - Inbound/Outbound Endpoint Resolver
 ![image](https://github.com/user-attachments/assets/2f369621-77db-4a84-a3ab-da994bb47079)
 ----
 ### DB Replication
+
 데이터베이스 복제를 통해 가용성과 재해 복구 기능을 향상시킵니다. 리전 간 복제를 통해 지리적 이중화를 제공할 수 있습니다. 사용하는 데이터베이스 서비스에 따라 구체적인 방법이 달라집니다. (예: RDS, Aurora, DynamoDB 등)
+
+![image](https://github.com/user-attachments/assets/248bf8f1-5b2b-447a-aef7-f167f3f86c8a)
