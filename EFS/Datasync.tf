@@ -1,22 +1,22 @@
-data "aws_vpc_endpoint" "endpoint" {
-  id = aws_vpc_endpoint.datasync_endpoint.id
-}
+# data "aws_vpc_endpoint" "endpoint" {
+#   id = aws_vpc_endpoint.datasync_endpoint.id
+# }
 
-data "aws_network_interface" "enis" {
-  for_each = toset(data.aws_vpc_endpoint.endpoint.network_interface_ids)
-  id       = each.value
-}
+# data "aws_network_interface" "enis" {
+#   for_each = toset(data.aws_vpc_endpoint.endpoint.network_interface_ids)
+#   id       = each.value
+# }
 
-output "vpc_endpoint_private_ips" {
-  value = {
-    for k, v in data.aws_network_interface.enis : k => v.private_ip
-  }
-}
+# output "vpc_endpoint_private_ips" {
+#   value = {
+#     for k, v in data.aws_network_interface.enis : k => v.private_ip
+#   }
+# }
 
-data "http" "activation_key" {
-#     url = "http://10.1.1.100/activation-key?gatewayType=SYNC&activationRegion=ap-northeast-2&endpointType=PUBLIC&no_redirect" # Agent VM IP 주소와 리전 등으로 변경
-    url = "http://${aws_instance.aws_instance_datasync1.public_ip}/activation-key?gatewayType=SYNC&activationRegion=ap-northeast-2&privateLinkEndpoint=${vpc_endpoint_private_ips[0]}&endpointType=PRIVATE_LINK&no_redirect"
-}
+# data "http" "activation_key" {
+# #     url = "http://10.1.1.100/activation-key?gatewayType=SYNC&activationRegion=ap-northeast-2&endpointType=PUBLIC&no_redirect" # Agent VM IP 주소와 리전 등으로 변경
+#     url = "http://${aws_instance.aws_instance_datasync1.public_ip}/activation-key?gatewayType=SYNC&activationRegion=ap-northeast-2&privateLinkEndpoint=${vpc_endpoint_private_ips[0]}&endpointType=PRIVATE_LINK&no_redirect"
+# }
 
 
 # resource "aws_datasync_agent" "agent" {
