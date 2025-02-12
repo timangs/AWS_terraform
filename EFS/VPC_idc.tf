@@ -160,19 +160,3 @@ systemctl enable httpd
 echo "<h1>Seoul AWS Public Instance idc_instance_web2</h1>" > /var/www/html/index.html
 EOF
 }
-
-resource "aws_instance" "aws_instance_datasync1" {
-  provider = aws.se
-  ami           = var.se_datasync_ami
-  instance_type = var.datasync_instance_type
-  associate_public_ip_address = "true"
-  private_ip = "10.1.1.100"
-  subnet_id = aws_subnet.aws_subnet["aws1"].id
-  key_name = var.se_key
-  security_groups = [aws_security_group.aws_securitygroup.id]
-  tags = {
-    Name = "aws_instance_datasync1"
-  }
-  iam_instance_profile = aws_iam_instance_profile.datasync_role.name
-  depends_on = [ aws_efs_mount_target.aws_efs_target ]
-}
