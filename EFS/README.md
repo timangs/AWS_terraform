@@ -10,7 +10,7 @@
 
 ----
 
-Inter-VPC EFS연결
+### Inter-VPC EFS연결
 
 https://github.com/aws/efs-utils/blob/master/README.md#install-botocore
 
@@ -34,3 +34,18 @@ pip3 install botocore || /usr/local/bin/pip3 install botocore
 pip3 install botocore --upgrade
 mount -t efs -o tls ${aws_efs_file_system.idc_efs.id}:/ /soldesk
 ```
+
+----
+
+<details>
+<summary>콘솔 작업 내용</summary>
+
+![image](https://github.com/user-attachments/assets/035d595a-9c7b-4d3b-b2bf-38983de6020d)
+
+![image](https://github.com/user-attachments/assets/e9980ab9-69b5-4efa-977a-ac492460aaf9)
+
+![image](https://github.com/user-attachments/assets/77b15100-72d3-4f9d-8388-1d0b523ce6d1)
+
+![image](https://github.com/user-attachments/assets/49753c49-8b76-4c48-8472-eabdb05621fc)
+
+</details>
