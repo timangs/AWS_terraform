@@ -26,6 +26,6 @@ resource "aws_security_group" "idc_securitygroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "ase_securitygroup"
+    Name = "idc_securitygroup"
   }
 }

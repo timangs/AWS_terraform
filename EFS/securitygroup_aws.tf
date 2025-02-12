@@ -10,7 +10,8 @@ resource "aws_security_group" "aws_securitygroup" {
       {from=443, to=443, protocol="tcp", cidr=["0.0.0.0/0"]},
       {from=22, to=22, protocol="tcp", cidr=["0.0.0.0/0"]},
       {from=-1, to=-1, protocol="icmp", cidr=["0.0.0.0/0"]},
-      {from=2049, to=2049, protocol="tcp", cidr=["0.0.0.0/0"]}
+      {from=2049, to=2049, protocol="tcp", cidr=["0.0.0.0/0"]},
+      {from=1024, to=1064, protocol="tcp", cidr=["0.0.0.0/0"]} # 정품인증키 받아오기 위해 필요함
     ]
     content {
       from_port   = ingress.value.from
@@ -26,6 +27,6 @@ resource "aws_security_group" "aws_securitygroup" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   tags = {
-    Name = "ase_securitygroup1"
+    Name = "aws_securitygroup"
   }
 }

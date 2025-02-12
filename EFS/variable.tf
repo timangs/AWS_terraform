@@ -38,10 +38,18 @@ variable "si_ami" {
   type = string
   default = "ami-0de20ddce8ba98c24"
 }
-
+variable "se_datasync_ami" {
+  type = string
+  default = "ami-001e5d98f36954fe6"
+}
 
 variable "instance_type" {
   description = "Instance t2.micro"
   type        = string
   default     = "t2.micro"
+}
+
+variable "datasync_instance_type" {
+  description = "Instance m5.2xlarge"
+  default = "m5.2xlarge"
 }
