@@ -1,7 +1,7 @@
-resource "aws_security_group" "ase_securitygroup1" {
+resource "aws_security_group" "aws_securitygroup" {
   provider = aws.se
-  name     = "ase_securitygroup1"
-  vpc_id   = aws_vpc.ase_vpc1.id
+  name     = "aws_securitygroup"
+  vpc_id   = aws_vpc.aws_vpc.id
   dynamic "ingress" {
     for_each = [
       {from=53, to=53, protocol="tcp", cidr=["0.0.0.0/0"]},
@@ -10,10 +10,7 @@ resource "aws_security_group" "ase_securitygroup1" {
       {from=443, to=443, protocol="tcp", cidr=["0.0.0.0/0"]},
       {from=22, to=22, protocol="tcp", cidr=["0.0.0.0/0"]},
       {from=-1, to=-1, protocol="icmp", cidr=["0.0.0.0/0"]},
-      {from=4500, to=4500, protocol="udp", cidr=["0.0.0.0/0"]},
-      {from=3306, to=3306, protocol="tcp", cidr=["0.0.0.0/0"]},
-      {from=179, to=179, protocol="tcp", cidr=["0.0.0.0/0"]},
-      {from=500, to=500, protocol="udp", cidr=["0.0.0.0/0"]}
+      {from=2049, to=2049, protocol="tcp", cidr=["0.0.0.0/0"]}
     ]
     content {
       from_port   = ingress.value.from
