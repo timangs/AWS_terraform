@@ -68,3 +68,16 @@ KMS 키가 필요하지만 본 Database Instance는 Terraform에 의해 생성�
 단, 지금은 테스트로 생성하여 유실될 데이터가 없기 때문에 체크를 해제하여 삭제하여 추가적인 비용이 청구되지 않도록 합니다.
 
 </details>
+
+<details>
+<summary>읽기 전용 복제본 생성</summary>
+  
+![image](https://github.com/user-attachments/assets/52028eda-8fb1-4d59-84b2-42959e0c8399)
+
+자동 백업이 활성화 되어야 읽기 전용 복제본을 생성할 수 있다.
+
+![image](https://github.com/user-attachments/assets/f8767e4d-5ccb-4a42-8fbc-3f176bb359a1)
+
+![image](https://github.com/user-attachments/assets/f67edb9c-57dc-4e22-a32d-85bba3e1a7c2)
+
+</details>
