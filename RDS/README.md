@@ -30,6 +30,14 @@ RDS에서 복원하게 되면 새로운 Instance로 생성된다.
 </details>
 
 <details>
+<summary>교차 리전 백업</summary>
+
+
+KMS 키가 필요하지만 본 Database Instance는 Terraform에 의해 생성되어 KMS키를 별도로 요구하지 않는다.
+
+</details>
+
+<details>
 <summary>RDS Instance삭제 시 주의사항</summary>
 
 최종 스냅샷은 RDS 인스턴스 삭제 직전의 마지막 백업입니다. 실수로 삭제하거나, 삭제 후 데이터 복구가 필요할 때를 대비하는 기능입니다.
