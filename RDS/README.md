@@ -80,4 +80,8 @@ KMS 키가 필요하지만 본 Database Instance는 Terraform에 의해 생성�
 
 ![image](https://github.com/user-attachments/assets/f67edb9c-57dc-4e22-a32d-85bba3e1a7c2)
 
+![image](https://github.com/user-attachments/assets/3674cd9e-aefb-4786-8f24-0096edec32ad)
+
+필요에 따라 읽기전용 복제본을 master로 승격시킬 수 있다. 이경우 Link가 풀리고 독립적인 DB로 관리된다.
+
 </details>
