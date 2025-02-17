@@ -22,8 +22,8 @@ resource "aws_db_instance" "rds_mysql1" {
   db_subnet_group_name   = aws_db_subnet_group.rds_mysql1.name
 
   # Enhanced Monitoring 설정
-  monitoring_interval = 60
-  monitoring_role_arn = aws_iam_role.rds_enhanced_monitoring.arn # 생성한 IAM 역할의 ARN
+  # monitoring_interval = 60
+  # monitoring_role_arn = aws_iam_role.rds_enhanced_monitoring.arn # 생성한 IAM 역할의 ARN
 
 
   multi_az               = true
@@ -32,12 +32,12 @@ resource "aws_db_instance" "rds_mysql1" {
   db_name                = "sqlDB"  
   parameter_group_name = aws_db_parameter_group.rds_mysql1.name
   apply_immediately          = true # 수정 즉시적용
-  backup_retention_period = 3 # 백업 보존 기간
+  backup_retention_period = 0 # 백업 보존 기간
   deletion_protection    = false  # 삭제 방지 설정
   skip_final_snapshot = true # 최종 스냅샷 설정
 
   #로그 설정
-  enabled_cloudwatch_logs_exports = ["error", "general"]
+  # enabled_cloudwatch_logs_exports = ["error", "general"]
 
 }
 
