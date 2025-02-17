@@ -13,5 +13,7 @@ amazon-linux-extras install epel -y
 wget https://dev.mysql.com/get/mysql80-community-release-el7-9.noarch.rpm
 yum localinstall mysql80-community-release-el7-9.noarch.rpm -y
 yum install mysql-community-server-8.0.40 --nogpgcheck -y
+amazon-linux-extras enable php8.2
+amazon-linux-extras install -y php8.2
 EOF
 }
