@@ -1,4 +1,3 @@
-
 resource "aws_instance" "aws_con_instance" {
   provider = aws.se
   ami           = var.se_ami
