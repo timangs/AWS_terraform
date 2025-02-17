@@ -1,4 +1,10 @@
-### AWS RDS 주요 특징
+```
+# connection Instance에서 RDS 접근 시
+mysql -uadmin -p -h database-1.xxxxxxxx637.ap-northeast-2.rds.amazonaws.com
+#RDS 인스턴스 생성시 비밀번호 timangs123로 생성하였음
+```
+
+### AWS RDS 특징
 
 > RDS Software Patch 는 CSP에서 해주므로 Client 측에서 하지않는다.
 
