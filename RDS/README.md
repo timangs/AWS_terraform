@@ -24,6 +24,14 @@ RDS에서 복원하게 되면 새로운 Instance로 생성된다.
 <details>
 <summary>스냅샷을 이용한 수동 복원</summary>
 
+![image](https://github.com/user-attachments/assets/2668ad07-b609-44d2-99c4-39d289952290)
+
+![image](https://github.com/user-attachments/assets/9e19a0d9-087c-4151-b831-4bb5293f1e60)
+
+![image](https://github.com/user-attachments/assets/5c1303e2-7f72-46a7-b268-15a8c715d025)
+
+![image](https://github.com/user-attachments/assets/514b4857-5282-4261-b79a-01d428a75098)
+
 
 특정 시점으로 복원과 달리 설정이 동일하게 입력되지 않기 때문에 생성 시에 내용을 잘 확인해야 한다.
 
@@ -32,6 +40,11 @@ RDS에서 복원하게 되면 새로운 Instance로 생성된다.
 <details>
 <summary>교차 리전 백업</summary>
 
+![image](https://github.com/user-attachments/assets/3ddc4538-34df-46be-9667-ee8ca3130f2d)
+
+![image](https://github.com/user-attachments/assets/22e1c21a-f94b-4467-b68c-5d7367ec6236)
+
+![image](https://github.com/user-attachments/assets/3377db2c-bfe4-4be4-b318-29243a26fab6)
 
 KMS 키가 필요하지만 본 Database Instance는 Terraform에 의해 생성되어 KMS키를 별도로 요구하지 않는다.
 
@@ -39,6 +52,8 @@ KMS 키가 필요하지만 본 Database Instance는 Terraform에 의해 생성�
 
 <details>
 <summary>RDS Instance삭제 시 주의사항</summary>
+
+![image](https://github.com/user-attachments/assets/c3d1f6ea-19e8-4e56-8234-7de8ae4eea1e)
 
 최종 스냅샷은 RDS 인스턴스 삭제 직전의 마지막 백업입니다. 실수로 삭제하거나, 삭제 후 데이터 복구가 필요할 때를 대비하는 기능입니다.
 
