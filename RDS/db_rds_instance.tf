@@ -1,48 +1,58 @@
 resource "aws_db_instance" "rds_mysql1" {
-  # DB 식별자
-  identifier             = "database-1"
+  identifier             = "database-1"  # DB 식별자
 
-  # 엔진 옵션
-  engine                 = "mysql"
+  engine                 = "mysql"   # 엔진 옵션
   engine_version         = "8.0.40"
 
-  # 인스턴스 구성
-  instance_class         = "db.t3.micro"
+  instance_class         = "db.t3.micro"  # 인스턴스 구성
 
-  # 스토리지
-  storage_type           = "gp3"
+  storage_type           = "gp3"  # 스토리지
   allocated_storage      = 20
 
-  # 자격 증명
-  username               = "admin"
+  username               = "admin"   # 자격 증명
   password               = "timangs123"
 
-  # 연결
-  vpc_security_group_ids = [aws_security_group.rds_mysql1.id]
+  vpc_security_group_ids = [aws_security_group.rds_mysql1.id]   # 연결
   db_subnet_group_name   = aws_db_subnet_group.rds_mysql1.name
 
-  # Enhanced Monitoring 설정
-  # monitoring_interval = 60
+  # monitoring_interval = 60   # Enhanced Monitoring 설정
   # monitoring_role_arn = aws_iam_role.rds_enhanced_monitoring.arn # 생성한 IAM 역할의 ARN
 
-
-  multi_az               = true
+  multi_az               = true # false시 단일 AZ 인스턴스, true시 다중 AZ 인스턴스
   publicly_accessible    = false
-  # 만약 skip_final_snapshot가 false면 final_snapshot_identifier = "database-1-final-snapshot-20240307"  
   db_name                = "sqlDB"  
   parameter_group_name = aws_db_parameter_group.rds_mysql1.name
   apply_immediately          = true # 수정 즉시적용
-  backup_retention_period = 0 # 백업 보존 기간
+  backup_retention_period = 3 # 백업 보존 기간
   deletion_protection    = false  # 삭제 방지 설정
-  skip_final_snapshot = true # 최종 스냅샷 설정
+  skip_final_snapshot = true # 최종 스냅샷 설정   # 만약 skip_final_snapshot가 false면 final_snapshot_identifier = "database-1-final-snapshot-20240307"  
 
-  #로그 설정
-  # enabled_cloudwatch_logs_exports = ["error", "general"]
-
+  # enabled_cloudwatch_logs_exports = ["error", "general"]   #로그 설정
 }
 
-# IAM Role 생성 (Enhanced Monitoring 역할)
-resource "aws_iam_role" "rds_enhanced_monitoring" {
+resource "aws_db_instance" "rds_mysql1_replica" { # 읽기전용 복제본
+  identifier = "database-1-replica" # DB 식별자
+  replicate_source_db = aws_db_instance.rds_mysql1.identifier # 원본 (Blue) DB 인스턴스 지정
+  instance_class = "db.t3.micro"
+  availability_zone = "ap-northeast-2a"
+  vpc_security_group_ids = [aws_security_group.rds_mysql1.id]
+  publicly_accessible    = false
+  skip_final_snapshot = true
+  apply_immediately   = true 
+  deletion_protection    = false
+  parameter_group_name = aws_db_parameter_group.rds_mysql1.name
+}
+
+# resource "aws_db_instance_automated_backups_replication" "rds_mysql1_green" { # 교차 리전 복제본
+#   source_db_instance_arn = aws_db_instance.rds_mysql1.arn # Blue 환경의 ARN
+#   kms_key_id = data.aws_kms_key.by_alias.arn # kms 암호화 키
+# }
+
+data "aws_kms_key" "by_alias" {
+  key_id = "alias/aws/rds"
+}
+
+resource "aws_iam_role" "rds_enhanced_monitoring" { # IAM Role 생성 (Enhanced Monitoring 역할)
   name = "rds-enhanced-monitoring-role"
 
   assume_role_policy = jsonencode({
@@ -59,8 +69,7 @@ resource "aws_iam_role" "rds_enhanced_monitoring" {
   })
 }
 
-# IAM Role Policy Attachment 
-resource "aws_iam_role_policy_attachment" "rds_enhanced_monitoring_attachment" {
+resource "aws_iam_role_policy_attachment" "rds_enhanced_monitoring_attachment" { # IAM Role Policy Attachment 
   role       = aws_iam_role.rds_enhanced_monitoring.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
@@ -112,7 +121,7 @@ resource "aws_db_parameter_group" "rds_mysql1" {
   }
   parameter {
     name  = "collation_server"
-    value = "utf8mb4_general_ci"  # 또는 utf8mb4_general_ci
+    value = "utf8mb4_general_ci"
   }
   parameter {
     name  = "character_set_client"
