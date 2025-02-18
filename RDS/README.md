@@ -85,3 +85,18 @@ KMS 키가 필요하지만 본 Database Instance는 Terraform에 의해 생성�
 필요에 따라 읽기전용 복제본을 master로 승격시킬 수 있다. 이경우 Link가 풀리고 독립적인 DB로 관리된다.
 
 </details>
+
+<details>
+<summary>블루/그린 배포</summary>
+
+![image](https://github.com/user-attachments/assets/1e0b7cc1-f91c-4830-b56a-eb9fae7ed369)
+
+![image](https://github.com/user-attachments/assets/f028d3a0-568a-42be-8240-1b7962df599d)
+
+![image](https://github.com/user-attachments/assets/6682beb0-05d8-423e-a322-5869b0456d71)
+
+![image](https://github.com/user-attachments/assets/c15d228c-10e1-4dff-99b8-43538ae68dc2)
+
+![image](https://github.com/user-attachments/assets/a78ce65d-3c3b-4eb9-b6ec-a129e3f42420)
+
+</details>
