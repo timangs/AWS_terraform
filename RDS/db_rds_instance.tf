@@ -48,9 +48,9 @@ resource "aws_db_instance" "rds_mysql1_replica" { # 읽기전용 복제본
 #   kms_key_id = data.aws_kms_key.by_alias.arn # kms 암호화 키
 # }
 
-data "aws_kms_key" "by_alias" {
-  key_id = "alias/aws/rds"
-}
+# data "aws_kms_key" "by_alias" {
+#   key_id = "alias/aws/rds"
+# }
 
 resource "aws_iam_role" "rds_enhanced_monitoring" { # IAM Role 생성 (Enhanced Monitoring 역할)
   name = "rds-enhanced-monitoring-role"

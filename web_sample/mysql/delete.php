@@ -56,7 +56,6 @@
                 <input type="submit" value="삭제">
             </div>
         </form>
-        <div class="info">hyzzangg@gmail.com/BlueJasmine CORP.</div>
     </div>
 </body>
 </html>

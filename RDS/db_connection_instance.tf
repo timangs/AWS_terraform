@@ -19,7 +19,7 @@ systemctl start httpd
 systemctl enable httpd
 yum install -y php php-mysqlnd php-gd php-mbstring php-xml
 systemctl restart httpd
-for file in $(aws s3 ls s3://timangs-temp-files/ | awk '{print $4}'); do
-  aws s3 cp s3://timangs-temp-files/$file /var/www/html/; done
+# for file in $(aws s3 ls s3://timangs-temp-files/ | awk '{print $4}'); do
+#   aws s3 cp s3://timangs-temp-files/$file /var/www/html/; done
 EOF
 }

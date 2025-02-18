@@ -59,7 +59,6 @@
                 <input type="submit" value="회원 입력">
             </div>
         </form>
-        <div class="info">hyzzangg@gmail.com/BlueJasmine CORP.</div>
     </div>
 </body>
 </html>

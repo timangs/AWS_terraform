@@ -72,7 +72,6 @@ $result = $conn->query($sql);
     }
     $conn->close();
     ?>
-    <div class="info">문의: hyzzangg@nate.com / BlueJasmine CORP.</div>
 </div>
 </body>
 </html>
