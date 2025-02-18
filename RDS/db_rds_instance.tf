@@ -18,7 +18,7 @@ resource "aws_db_instance" "rds_mysql1" {
   # monitoring_interval = 60   # Enhanced Monitoring 설정
   # monitoring_role_arn = aws_iam_role.rds_enhanced_monitoring.arn # 생성한 IAM 역할의 ARN
 
-  multi_az               = true # false시 단일 AZ 인스턴스, true시 다중 AZ 인스턴스
+  multi_az               = false # false시 단일 AZ 인스턴스, true시 다중 AZ 인스턴스
   publicly_accessible    = false
   db_name                = "sqlDB"  
   parameter_group_name = aws_db_parameter_group.rds_mysql1.name
