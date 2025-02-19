@@ -24,3 +24,5 @@ yum install -y php php-mysqlnd php-gd php-mbstring php-xml
 #   aws s3 cp s3://timangs-temp-files/$file /var/www/html/; done
 EOF
 }
+
+#ALTER USER 'root'@'localhost' IDENTIFIED BY 'Qwer!234';
