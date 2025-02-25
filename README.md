@@ -7,6 +7,12 @@
 
 ## Practice
 
+> DynamoDB
+> EFS (Elastic File System)
+> RDS_Aurora(PostgreSQL)
+> RDS_mysql
+> SQS (Simply Queue Service)
+
 ----
 
 ### Resource
