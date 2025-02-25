@@ -5,6 +5,22 @@ resource "aws_instance" "aws_consumer_instance" {
   associate_public_ip_address = "true"
   key_name = var.se_key
   iam_instance_profile = "_ec2_admin"
+  connection {
+    type        = "ssh"
+    user        = "ec2-user" 
+    private_key = file("../../seoul-key")
+    host        = self.public_ip
+  }
+  provisioner "file" {
+    source      = "worker.py"
+    destination = "/home/ec2-user/worker.py"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'worker.py uploaded successfully!'",
+    ]
+  }
   tags = {
     Name = "aws_consumer_instance"
   }
@@ -14,6 +30,6 @@ yum update -y
 yum groupinstall -y "Development Tools"
 yum install -y python3-pip
 sudo -u ec2-user pip install boto3
-# worker.py을 만들어서 module 만해결
+# python3 worker.py
 EOD
 }

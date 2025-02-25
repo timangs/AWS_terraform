@@ -5,6 +5,21 @@ resource "aws_instance" "aws_producer_instance" {
   associate_public_ip_address = "true"
   key_name = var.se_key
   iam_instance_profile = "_ec2_admin"
+  connection {
+    type        = "ssh"
+    user        = "ec2-user" 
+    private_key = file("../../seoul-key")
+    host        = self.public_ip
+  }
+  provisioner "file" {
+    source      = "producer.py" 
+    destination = "/home/ec2-user/producer.py"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'producer.py uploaded successfully!'",
+    ]
+  }
   tags = {
     Name = "aws_producer_instance"
   }
