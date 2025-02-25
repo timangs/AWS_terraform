@@ -13,6 +13,7 @@ resource "aws_instance" "aws_consumer_instance" {
 yum update -y
 yum groupinstall -y "Development Tools"
 yum install -y python3-pip
+sudo -u ec2-user pip install boto3
 # worker.py을 만들어서 module 만해결
 EOD
 }

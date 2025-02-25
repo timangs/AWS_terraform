@@ -13,6 +13,7 @@ resource "aws_instance" "aws_producer_instance" {
 yum update -y
 yum groupinstall -y "Development Tools"
 yum install -y python3-pip
-# producer.py을 만들어서 module 만해결
+sudo -u ec2-user pip install boto3
+# python3 producer.py
 EOD
 }
