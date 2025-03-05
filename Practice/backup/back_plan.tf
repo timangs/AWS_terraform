@@ -13,7 +13,7 @@ resource "aws_backup_plan" "backup_plan_01" {
   rule {
     rule_name         = "backup_plan_01"
     target_vault_name = aws_backup_vault.backup.name
-    schedule          = "cron(10 7 * * ? *)"
+    schedule          = "cron(10 7 * * ? *)" #오후 4시 10분
     start_window      = 60    #1시간
     completion_window = 10080 #7일
 
