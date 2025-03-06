@@ -82,27 +82,27 @@ TBLPROPERTIES (
     "projection.year.interval.unit" = "YEARS",
     "projection.month.interval.unit" = "MONTHS",
     "projection.day.interval.unit" = "DAYS",
-    "storage.location.template" = "s3://${aws_s3_bucket.athena_log_bucket.bucket}/elb_log/AWSLogs/${aws_vpc.vpc.owner_id}/elasticloadbalancing/ap-northeast-2/${year}/${month}/${day}"
+    "storage.location.template" = "s3://${aws_s3_bucket.athena_log_bucket.bucket}/elb_log/AWSLogs/${aws_vpc.vpc.owner_id}/elasticloadbalancing/ap-northeast-2/\${year}/\${month}/\${day}"
 );
 EOF
 }
 
-data "aws_athena_query_result" "alb_logs_query" {
-  query_execution_id = aws_athena_query_execution.run_query.id
+resource "aws_athena_named_query" "run_alb_logs_query" {
+  name      = "run_alb_logs_query"
+  database  = aws_glue_catalog_database.default_db.name # 또는 "default"
+  workgroup = aws_athena_workgroup.example.name
+  query     = <<EOF
+SELECT * FROM alb_access_logs WHERE year = '2024' AND month = '03' AND day = '06';
+EOF
   depends_on = [aws_athena_named_query.create_alb_access_logs_table]
-
 }
 
-resource "aws_athena_query_execution" "run_query" {
-    query = "select * from default.alb_access_logs where month='03' and day = '06';" # 쿼리 실행
-    workgroup = aws_athena_workgroup.workgroup.name
-    
-      query_execution_context {
-        database = aws_glue_catalog_database.default_db.name
-  }
+data "aws_athena_query_results" "alb_logs_query_results" {
+  query_execution_id = aws_athena_named_query.run_alb_logs_query.id
+  depends_on = [aws_athena_named_query.run_alb_logs_query]
 }
 
 output "alb_logs" {
-  value = data.aws_athena_query_result.alb_logs_query.result_rows
+  value       = data.aws_athena_query_results.alb_logs_query_results.result_rows
   description = "The results of the Athena query."
 }
