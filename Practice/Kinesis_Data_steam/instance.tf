@@ -23,7 +23,6 @@ yum update -y
 amazon-linux-extras enable python3.8
 yum install -y aws-cli python38 pip
 pip3.8 install boto3
-
 EOF
 }
 
