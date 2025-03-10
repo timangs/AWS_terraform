@@ -1,5 +1,5 @@
 resource "aws_kinesis_stream" "stream" {
-  name        = "kinesis-stream"
+  name        = "kinesis_stream"
   shard_count = 1
 }
 
