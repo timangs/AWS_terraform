@@ -6,7 +6,8 @@ resource "random_string" "random_suffix" {
   numeric          = true
 }
 
-resource "aws_s3_bucket" "" {
+
+resource "aws_s3_bucket" "firehose_bucket" {
   bucket = "firehose-stream-${random_string.random_suffix.result}"
   force_destroy = true
 }
