@@ -1,0 +1,355 @@
+네, Terraform을 사용하여 S3 버킷에 객체(로그 파일)가 생성되거나 수정될 때 Lambda 함수(Python)를 트리거하여 해당 파일 내용을 Elasticsearch로 전송하는 전체 인프라를 코드(IaC)로 구성하는 방법을 안내해 드리겠습니다.
+
+핵심 구성 요소 (Terraform으로 정의할 자원):
+
+S3 버킷: 로그 파일이 저장될 원본 버킷 (기존 버킷 사용 또는 Terraform으로 생성).
+IAM 역할 (Lambda용): Lambda 함수가 S3 객체 읽기, CloudWatch 로그 쓰기 등 필요한 작업을 수행할 권한을 부여하는 역할.
+Lambda Layer (선택 사항, 권장): Python 코드의 의존성 라이브러리(elasticsearch-py)를 포함하는 레이어. 코드를 깔끔하게 관리할 수 있습니다.
+Lambda 함수: S3 이벤트를 받아 파일을 읽고 Elasticsearch로 전송하는 Python 코드를 포함하는 함수 자체. 코드 패키징(zip) 필요.
+Lambda 함수 호출 권한: S3 서비스가 Lambda 함수를 호출할 수 있도록 허용하는 권한.
+S3 버킷 알림: S3 버킷에 특정 이벤트(객체 생성 등)가 발생했을 때 지정된 Lambda 함수로 알림을 보내도록 설정.
+프로젝트 구조 예시:
+
+.
+├── main.tf              # 주요 Terraform 설정 파일
+├── variables.tf         # 입력 변수 정의 (버킷 이름, ES 주소 등)
+├── outputs.tf           # 생성된 자원의 정보 출력 (선택 사항)
+├── lambda_function.py   # Lambda 함수 Python 코드
+├── requirements.txt     # Python 의존성 목록 (elasticsearch)
+└── python/              # Lambda Layer 생성을 위한 디렉토리
+    └── lib/python3.x/site-packages/ # pip install -t . 로 설치될 경로
+1. variables.tf (입력 변수 정의)
+
+필요한 값들을 변수로 정의하여 재사용성과 유연성을 높입니다.
+
+Terraform
+
+variable "aws_region" {
+  description = "AWS 리전"
+  type        = string
+  default     = "ap-northeast-2"
+}
+
+variable "s3_bucket_name" {
+  description = "로그가 저장될 S3 버킷 이름"
+  type        = string
+  # 예: default = "dotnet-log-bucket"
+  default = "logs-ce25ea519a5f6a0a"
+}
+
+variable "es_endpoint" {
+  description = "Elasticsearch 엔드포인트 URL (예: https://내-es-주소:9200)"
+  type        = string
+  sensitive   = true # 민감 정보일 수 있으므로 표시하지 않음
+}
+
+variable "es_auth_method" {
+  description = "Elasticsearch 인증 방식 ('none', 'basic', 'apikey')"
+  type        = string
+  default     = "none"
+}
+
+# --- 인증 정보 변수 (Secrets Manager 사용 권장!) ---
+# 예시: AWS Secrets Manager ARN 사용
+variable "es_secrets_arn" {
+  description = "Elasticsearch 인증 정보(username/password 또는 apikey id/secret)가 저장된 Secrets Manager Secret ARN"
+  type        = string
+  default     = "" # 기본값 없음, 필요시 제공
+  sensitive   = true
+}
+# 또는 직접 변수 사용 (덜 안전함)
+# variable "es_username" { ... sensitive = true }
+# variable "es_password" { ... sensitive = true }
+# variable "es_api_key_id" { ... sensitive = true }
+# variable "es_api_key_secret" { ... sensitive = true }
+# -------------------------------------------------
+
+variable "lambda_function_name" {
+  description = "생성할 Lambda 함수 이름"
+  type        = string
+  default     = "s3-to-es-processor"
+}
+
+variable "lambda_memory_size" {
+  description = "Lambda 함수 메모리 (MB)"
+  type        = number
+  default     = 256 # 로그 처리량에 따라 조절
+}
+
+variable "lambda_timeout" {
+  description = "Lambda 함수 타임아웃 (초)"
+  type        = number
+  default     = 60 # 로그 파일 크기에 따라 조절
+}
+
+# --- VPC 설정 (Elasticsearch가 VPC 내부에 있을 경우) ---
+variable "lambda_vpc_subnet_ids" {
+  description = "Lambda 함수를 연결할 VPC 서브넷 ID 목록"
+  type        = list(string)
+  default     = [] # VPC 연결 안 할 경우 빈 리스트
+}
+
+variable "lambda_vpc_security_group_ids" {
+  description = "Lambda 함수에 적용할 VPC 보안 그룹 ID 목록"
+  type        = list(string)
+  default     = [] # VPC 연결 안 할 경우 빈 리스트
+}
+# ------------------------------------------------------
+
+variable "log_file_suffix" {
+  description = "S3 트리거를 발생시킬 로그 파일 확장자 (예: .log)"
+  type        = string
+  default     = ".log"
+}
+
+variable "python_runtime" {
+  description = "Lambda 함수 Python 런타임"
+  type        = string
+  default     = "python3.11" # 사용 가능한 최신 버전 확인
+}
+2. requirements.txt (Python 의존성)
+
+elasticsearch>=8.0.0,<9.0.0
+3. lambda_function.py (Lambda 함수 코드)
+
+이전 답변에서 제공한 Python 코드 예시를 사용하되, Elasticsearch 접속 정보 및 인증 정보를 환경 변수에서 읽어오도록 합니다.
+
+Python
+
+# (이전 답변의 Python 코드 예시 참고)
+# import os
+# ES_ENDPOINT = os.environ['ES_ENDPOINT']
+# ES_AUTH_METHOD = os.environ.get('ES_AUTH_METHOD', 'none').lower()
+# ... 인증 정보 처리 로직 (환경 변수 또는 Secrets Manager 사용) ...
+# ... S3 파일 읽기 및 로그 파싱/구조화 로직 ...
+# ... Elasticsearch 로 전송 (es_client 사용) ...
+4. main.tf (주요 자원 정의)
+
+Terraform
+
+provider "aws" {
+  region = var.aws_region
+}
+
+# 데이터 소스: 현재 AWS 계정 ID 가져오기
+data "aws_caller_identity" "current" {}
+
+# 데이터 소스: S3 버킷 정보 가져오기 (기존 버킷 사용 시)
+data "aws_s3_bucket" "log_bucket" {
+  bucket = var.s3_bucket_name
+}
+# 또는 Terraform으로 버킷 생성 시:
+# resource "aws_s3_bucket" "log_bucket" {
+#   bucket = var.s3_bucket_name
+#   # ... 다른 버킷 설정 ...
+# }
+
+
+# --- Lambda Layer 생성 (로컬에서 미리 준비 필요) ---
+# 1. 로컬에서 실행:
+#    mkdir -p python
+#    pip install -r requirements.txt -t python/
+#    zip -r ../lambda_layer.zip python/
+# 2. Terraform 설정:
+data "archive_file" "lambda_layer_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/python" # pip install -t python/ 으로 설치된 경로
+  output_path = "${path.module}/lambda_layer.zip"
+}
+
+resource "aws_lambda_layer_version" "es_lib_layer" {
+  filename            = data.archive_file.lambda_layer_zip.output_path
+  layer_name          = "${var.lambda_function_name}-layer"
+  source_code_hash    = data.archive_file.lambda_layer_zip.output_base64sha256
+  compatible_runtimes = [var.python_runtime]
+}
+# ----------------------------------------------------
+
+# --- Lambda 함수 코드 패키징 ---
+data "archive_file" "lambda_code_zip" {
+  type        = "zip"
+  source_file = "${path.module}/lambda_function.py"
+  output_path = "${path.module}/lambda_function.zip"
+}
+# -----------------------------
+
+# --- IAM 역할 및 정책 생성 ---
+resource "aws_iam_role" "lambda_exec_role" {
+  name = "${var.lambda_function_name}-exec-role"
+
+  assume_role_policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# 기본 Lambda 실행 정책 연결
+resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# S3 읽기 정책 생성 및 연결
+resource "aws_iam_policy" "s3_read_policy" {
+  name        = "${var.lambda_function_name}-s3-read-policy"
+  description = "Allow Lambda to read from the S3 bucket"
+
+  policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:GetObject"
+        ]
+        Effect   = "Allow"
+        Resource = "${data.aws_s3_bucket.log_bucket.arn}/*" # 버킷 내 모든 객체
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "s3_read_attachment" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.s3_read_policy.arn
+}
+
+# (VPC 연결 시) VPC 접근 정책 연결
+resource "aws_iam_role_policy_attachment" "lambda_vpc_execution" {
+  count      = length(var.lambda_vpc_subnet_ids) > 0 ? 1 : 0 # VPC 변수가 있을 때만 연결
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+# (Secrets Manager 사용 시) Secret 읽기 정책 연결
+resource "aws_iam_policy" "secrets_read_policy" {
+  count       = var.es_secrets_arn != "" ? 1 : 0 # Secret ARN이 있을 때만 생성
+  name        = "${var.lambda_function_name}-secrets-read-policy"
+  description = "Allow Lambda to read ES secrets"
+
+  policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Effect   = "Allow"
+        Resource = var.es_secrets_arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "secrets_read_attachment" {
+  count      = var.es_secrets_arn != "" ? 1 : 0
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.secrets_read_policy[0].arn
+}
+# ------------------------------
+
+# --- Lambda 함수 생성 ---
+resource "aws_lambda_function" "s3_processor" {
+  function_name    = var.lambda_function_name
+  role             = aws_iam_role.lambda_exec_role.arn
+  handler          = "lambda_function.lambda_handler" # 파일명.함수명
+  runtime          = var.python_runtime
+  filename         = data.archive_file.lambda_code_zip.output_path
+  source_code_hash = data.archive_file.lambda_code_zip.output_base64sha256
+  memory_size      = var.lambda_memory_size
+  timeout          = var.lambda_timeout
+
+  layers = [aws_lambda_layer_version.es_lib_layer.arn]
+
+  environment {
+    variables = {
+      ES_ENDPOINT    = var.es_endpoint
+      ES_AUTH_METHOD = var.es_auth_method
+      # --- 인증 정보 환경 변수 설정 ---
+      # Secrets Manager ARN이 제공되면 해당 ARN을 전달 (코드 내에서 boto3로 가져와야 함)
+      ES_SECRETS_ARN = var.es_secrets_arn
+      # 또는 직접 전달 (덜 안전함, Terraform 변수 파일 관리 주의)
+      # ES_USERNAME       = var.es_username
+      # ES_PASSWORD       = var.es_password
+      # ES_API_KEY_ID     = var.es_api_key_id
+      # ES_API_KEY_SECRET = var.es_api_key_secret
+      # ----------------------------------
+    }
+  }
+
+  # VPC 설정 (필요한 경우)
+  vpc_config {
+    subnet_ids         = length(var.lambda_vpc_subnet_ids) > 0 ? var.lambda_vpc_subnet_ids : null
+    security_group_ids = length(var.lambda_vpc_security_group_ids) > 0 ? var.lambda_vpc_security_group_ids : null
+  }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_basic_execution,
+    aws_iam_role_policy_attachment.s3_read_attachment,
+    # 다른 policy attachment들도 필요시 추가
+  ]
+}
+# -----------------------
+
+# --- S3가 Lambda를 호출할 권한 부여 ---
+resource "aws_lambda_permission" "allow_s3_invoke" {
+  statement_id  = "AllowS3Invoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.s3_processor.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = data.aws_s3_bucket.log_bucket.arn
+  source_account = data.aws_caller_identity.current.account_id
+}
+# -----------------------------------
+
+# --- S3 버킷 알림 설정 ---
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  bucket = data.aws_s3_bucket.log_bucket.id # 기존 버킷 사용 시 id 사용
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.s3_processor.arn
+    events              = ["s3:ObjectCreated:*"] # 모든 객체 생성 이벤트
+    # events = ["s3:ObjectCreated:Put", "s3:ObjectCreated:CompleteMultipartUpload"] # 더 구체적으로 지정 가능
+
+    # 특정 파일 확장자에만 트리거되도록 필터링 (선택 사항)
+    filter_suffix = var.log_file_suffix
+  }
+
+  depends_on = [aws_lambda_permission.allow_s3_invoke]
+}
+# --------------------------
+5. outputs.tf (선택 사항)
+
+Terraform
+
+output "lambda_function_arn" {
+  description = "생성된 Lambda 함수의 ARN"
+  value       = aws_lambda_function.s3_processor.arn
+}
+
+output "lambda_iam_role_arn" {
+  description = "생성된 Lambda IAM 역할의 ARN"
+  value       = aws_iam_role.lambda_exec_role.arn
+}
+실행 방법:
+
+Lambda Layer 준비 (최초 1회 또는 의존성 변경 시):
+프로젝트 루트 디렉토리에서 requirements.txt 파일 생성 (elasticsearch 내용 포함).
+python 디렉토리 생성: mkdir python
+의존성 설치: pip install -r requirements.txt -t python/
+(필요시) 레이어 zip 파일 생성: zip -r lambda_layer.zip python/ (Terraform archive_file이 이 역할을 대신합니다.)
+변수 값 설정:
+variables.tf의 default 값을 수정하거나,
+별도의 terraform.tfvars 파일을 만들어 값을 정의합니다 (권장). 민감 정보(비밀번호, API 키)는 이 파일에 직접 넣지 말고, Secrets Manager나 환경 변수 등 안전한 방법을 사용하세요!
+Terraform 실행:
+terraform init : Terraform 초기화 (프로젝트 디렉토리에서 최초 1회 또는 프로바이더 변경 시)
+terraform plan -var-file="terraform.tfvars" : 실행 계획 확인 (tfvars 파일 사용 시)
+terraform apply -var-file="terraform.tfvars" : 인프라 생성/수정
+이제 Terraform이 정의된 AWS 자원들(IAM 역할, Lambda Layer, Lambda 함수, S3 알림 등)을 생성하고 연결하여 S3에 로그 파일이 생성/수정될 때마다 Lambda 함수가 실행되어 Elasticsearch로 데이터를 전송하는 파이프라인이 구축됩니다.

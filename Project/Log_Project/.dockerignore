@@ -1,0 +1,12 @@
+.gitattributes
+.gitignore
+.git
+README.md
+
+__pycache__/
+*.pyc
+*.pyo
+.venv
+.env
+
+*.tf
