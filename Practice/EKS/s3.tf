@@ -3,12 +3,11 @@
 # Create the S3 bucket for kOps state store
 resource "aws_s3_bucket" "kops_state" {
   bucket = var.s3_state_store # Use the variable for the bucket name
-
+  force_destroy = true
   # Prevent accidental deletion of the state store bucket
   lifecycle {
     prevent_destroy = false
   }
-
   tags = merge(var.instance_tags, {
     Name = var.s3_state_store
   })
